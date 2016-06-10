@@ -1,6 +1,11 @@
 module Data exposing (..) --where
 import Markdown
 
+{-
+My only suggested change at this time is to change question #4 to:
+“What is the title of the work you have excerpted and who is its author?”
+-}
+
 type alias Question = 
   { question : String
   , paragraphId : Int
@@ -51,7 +56,7 @@ Who wrote the quotation that you listed above?
         """
 Choose a short excerpt from one of your favourite authors that you feel is a good piece 
 of writing, and seems to follow the author’s advice that you listed in step 1. 
-Copy the except into the following text field (maximum 200 words):
+Copy the excerpt into the following text field (maximum 200 words):
         """
     , paragraphId = 1
     , rows = 7

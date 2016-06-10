@@ -48,24 +48,23 @@ update message model =
 view : Model -> Html Msg
 view model =
   let
-    mainContainer =
+    mainContainerStyle =
+      style
       [ "margin" => "0px"
       , "padding" => "0px"
       , "width" => "100vw"
       , "height" => "100vh"
       ]
-  in 
-  div [ class "mdl-grid", style mainContainer]
-    [ div [ class "mdl-cell mdl-cell--6-col", style questionContainer ]
-      App.map UpdateQuestions (Questions.view model.questions)
-    , essayView model.questions
-    ]
-
-
--- `essayView` is the view for the right side of the app which is the compiled essay
-essayView model = 
-  let
-    essay =
+    questionContainerStyle =
+      style
+      [ "padding" => "2vh 5vw 5vh 5vw"
+      , "overflow" => "hidden"
+      , "overflow-y" => "auto"
+      , "overflow-x" => "auto"
+      --, "background-color" => "aliceBlue" 
+      ]
+    essayContainerStyle =
+      style
       [ "padding" => "5vh 5vw 5vh 5vw"
       , "overflow" => "hidden"
       , "overflow-y" => "auto"
@@ -76,7 +75,33 @@ essayView model =
       , "-moz-box-shadow" => "-3px 0px 20px 0px rgba(50, 50, 50, 0.4)"
       , "box-shadow" => "-3px 0px 20px 0px rgba(50, 50, 50, 0.4)"
       ]
+    titleStyle =
+      style
+      [ "font-size" => "3.5em"
+      , "font-family" => "SuisseIntl-Thin"
+      , "padding-top" => "0.5em"
+      ]
 
+
+  in 
+  div [ class "mdl-grid", mainContainerStyle ]
+    [ div 
+       [ class "mdl-cell mdl-cell--6-col", questionContainerStyle ]
+       [ h1 [ titleStyle ] [ text model.questions.title ]
+       , App.map UpdateQuestions (Questions.view model.questions)
+       ]
+    , div 
+       [ class "mdl-cell mdl-cell--6-col", essayContainerStyle ] 
+       [ essayView model.questions ]
+    ]
+     {-
+      App.map UpdateQuestions (Questions.view model.questions)
+    , essayView model.questions
+     -}
+
+-- `essayView` is the view for the right side of the app which is the compiled essay
+essayView model = 
+  let
     instructionStyle =
       style
       [ "text-align" => "center"
@@ -96,7 +121,7 @@ essayView model =
       else
         div [ instructionStyle ] [ text <| "(" ++ model.instructions ++ ")"  ]
   in
-  div [ class "mdl-cell mdl-cell--6-col", style essay ] 
+  div [ ] 
     [ titleView model
     , essayContent
     ]
