@@ -1,155 +1,44 @@
 module WritingAdvice exposing (init, update, view) --where
 
 import Html exposing (..)
+import Html.App as App
 import Html.Attributes exposing (..)
-import Html.Events exposing (..)
-import Json.Decode as Json
 import Questions exposing (..)
 import String
-import Markdown
+import Data exposing (..)
 
 
 -- MODEL
 
 type alias Model = 
-  { title : String
-  , instructions : String
-  , questions : List Question
-  , field : String
-  , previousField : String
-  , numberOfParagraphs : Int
-  --, answer : String
-  --, essay : Essay
-
+  { questions : Questions.Model 
   }
+
 
 init : (Model, Cmd Msg)
 init =
-  let
-    createQuestion id' question =
-      { question = question.question
-      , answer = ""
-      , completed = False
-      , editing = False
-      , id = id'
-      , paragraphId = question.paragraphId
-      , rows = question.rows
-      , maxlength = question.maxlength
-      , format = question.format
-      }
-
-    numberOfParagraphs' =
-      let
-        paragraphIds =
-          List.map (\question -> question.paragraphId) Data.questions
-      in 
-        List.maximum paragraphIds |> Maybe.withDefault 0
-
-
-  in 
-  { title = Data.title
-  , instructions = Data.instructions 
-  , questions = List.indexedMap createQuestion Data.questions
-  , field = ""
-  , previousField = ""
-  , numberOfParagraphs = numberOfParagraphs'
-  } ![]
-
-
--- Question
-type alias Question =
-  { question : String
-  , answer : String
-  , completed : Bool
-  , editing : Bool
-  , id : Int
-  , paragraphId : Int
-  , rows : Int
-  , maxlength : Int
-  , format : Data.Format
+  { questions = Questions.init
   }
-
--- Sentence
-type alias Sentence =
-  { content : String
-  , completed : Bool
-  , editing : Bool
-  --, id : Int
-  }
-
--- Paragraph 
-type alias Paragraph =
-  { sentences : List Sentence
-  --, id : Int
-  }
-
--- Essay
-type alias Essay =
-  { paragraphs : List Paragraph
-  }
+  ![]
 
 
 -- UPDATE
 
 type Msg
-  = UpdateFieldOnInput String
-  | UpdateFieldOnFocus Question
-  | AddAnswer Question 
+  = UpdateQuestions Questions.Msg
   | NoOp
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
-update msg model =
-  case msg of
-    
-    -- Update the model's `field` property each time the user
-    -- types into an input field
-    UpdateFieldOnInput string ->
-      { model | field = string } ![]
-
-    -- When the user selects and input field, Set the model's `field` 
-    -- property to whatever the curren value of that input field is 
-    UpdateFieldOnFocus question ->
-      { model | field = question.answer } ![]
-
-    -- Update the question's `answer` property with the model's current
-    -- field value, and update the model's list of questions
-    AddAnswer question ->
-      let
-        questions' currentQuestion =
-          if currentQuestion.id == question.id then
-            { currentQuestion 
-              | answer = model.field
-              , completed = True 
-            }
-          else
-            currentQuestion
-      in
-        { model
-            | questions = List.map questions' model.questions 
-        } ![]
+update message model =
+  case message of
+    UpdateQuestions msg ->
+      { model | questions = Questions.update msg model.questions } 
+      ![]
     
     NoOp ->
-      model ![]
-
-
--- A function to check whether the user has pressed the Enter key (code 13).
--- If so, the Add message is returned
-onEnter : msg -> msg -> Attribute msg
-onEnter fail success =
-  let
-    tagger code =
-      if code == 13 then success
-      else fail
-  in
-    on "keyup" (Json.map tagger keyCode)
-
-
--- VIEW
-
-css : String -> Html Msg
-css path =
-  node "link" [ rel "stylesheet", href path ] []
+      model 
+      ![]
 
 
 -- VIEW
@@ -167,91 +56,9 @@ view model =
       ]
   in 
   div [ class "mdl-grid", style mainContainer]
-    [ questionsView model
-    , essayView model
-    ]
-
--- `questionsView` is the view for the left side of the app, which 
--- includes all the questions
-questionsView model =
-  let
-    questionContainer =
-      [ "padding" => "2vh 5vw 5vh 5vw"
-      , "overflow" => "hidden"
-      , "overflow-y" => "auto"
-      , "overflow-x" => "auto"
-      --, "background-color" => "aliceBlue" 
-      ]
-
-    textfieldStyle = 
-      style
-      [ "width" => "200%"
-      , "font-family" => "LibreBaskerville-Regular, serif"
-      , "font-size" => "1em"
-      , "line-height" => "1.5em"
-      , "padding" => "1em"
-      ]
-
-    questionStyle =
-      style
-      [ "font-size" => "1.2em"
-      ]
-
-    getMaxLength maxlength =
-      if maxlength /= 0 then
-        maxlength
-      else
-        500
-
-    setAutoFocus question =
-      if question.id == 0 then
-        True
-      else
-        False
-
-    questions question =
-      li []
-      [ Markdown.toHtml [ questionStyle ] question.question 
-      , div [ class "mdl-textfield mdl-js-textfield" ] 
-        [ textarea 
-          [ on "input" (Json.map UpdateFieldOnInput targetValue)
-          , onEnter NoOp (AddAnswer question)
-          , onBlur (AddAnswer question)
-          , onFocus (UpdateFieldOnFocus question)
-          , class "mdl-textfield__input"
-          , rows question.rows
-          , textfieldStyle
-          , maxlength <| getMaxLength question.maxlength
-          , autofocus <| setAutoFocus question
-          ] 
-          []
-        ]
-      ]
-
-    answers item =
-      div []
-      [ p [ ] [ text (toString(item.id + 1) ++ ". " ++ item.answer) ]
-      ]
-
-    titleStyle =
-      style
-      [ "font-size" => "3.5em"
-      , "font-family" => "SuisseIntl-Thin"
-      , "padding-top" => "0.5em"
-      ]
-
-  in
-  div [ class "mdl-cell mdl-cell--6-col", style questionContainer ]
-    [ img [ src "images/logoTVO_WritersDesk.png" ] [ ]
-    , h1 [ titleStyle ] [ text model.title ]
-    , ol [ ] (List.map questions model.questions)
-
-    -- Diagnostic
-    {-
-    , p [] [ text ("Paragraphs: " ++ toString(model.numberOfParagraphs))]
-    , p [] [ text model.field ]
-    , div [] (List.map answers model.questions)
-    -}
+    [ div [ class "mdl-cell mdl-cell--6-col", style questionContainer ]
+      App.map UpdateQuestions (Questions.view model.questions)
+    , essayView model.questions
     ]
 
 
@@ -344,7 +151,7 @@ sentenceView question =
 
     sentenceStyle =
       case question.format of 
-        Quotation ->
+        Data.Quotation ->
           style
           [ "font-style" => "italic"
           , "display" => "block"
@@ -353,7 +160,7 @@ sentenceView question =
           , "padding-bottom" => "1em"
           ]
 
-        AuthorOfQuotation ->
+        Data.AuthorOfQuotation ->
           style
           [ "display" => "block"
           , "text-align" => "right"

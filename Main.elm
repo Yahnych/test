@@ -1,7 +1,7 @@
 import Html exposing (..)
 import Html.App as Html
---import WritingAdvice exposing (init, view, update)
-import Questions exposing (init, view, update)
+import WritingAdvice exposing (init, view, update)
+--import Questions exposing (init, view, update)
 
 
 -- APP
