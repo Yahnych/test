@@ -4,7 +4,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Json.Decode as Json
-import Data exposing (..)
+import Questions exposing (..)
 import String
 import Markdown
 
