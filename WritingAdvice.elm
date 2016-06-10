@@ -5,6 +5,7 @@ import Html.App as App
 import Html.Attributes exposing (..)
 import Questions exposing (..)
 import String
+import Header exposing (..)
 import Data exposing (..)
 
 
@@ -12,12 +13,14 @@ import Data exposing (..)
 
 type alias Model = 
   { questions : Questions.Model 
+  , header : Header.Model
   }
 
 
 init : (Model, Cmd Msg)
 init =
   { questions = Questions.init
+  , header = Header.init
   }
   ![]
 
@@ -26,6 +29,7 @@ init =
 
 type Msg
   = UpdateQuestions Questions.Msg
+  | UpdateHeader Header.Msg
   | NoOp
 
 
@@ -34,6 +38,10 @@ update message model =
   case message of
     UpdateQuestions msg ->
       { model | questions = Questions.update msg model.questions } 
+      ![]
+
+    UpdateHeader msg ->
+      { model | header = Header.update msg model.header }
       ![]
     
     NoOp ->
@@ -87,7 +95,8 @@ view model =
   div [ class "mdl-grid", mainContainerStyle ]
     [ div 
        [ class "mdl-cell mdl-cell--6-col", questionContainerStyle ]
-       [ h1 [ titleStyle ] [ text model.questions.title ]
+       [ App.map UpdateHeader (Header.view model.header)
+       , h1 [ titleStyle ] [ text model.questions.title ]
        , App.map UpdateQuestions (Questions.view model.questions)
        ]
     , div 
