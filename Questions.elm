@@ -161,14 +161,6 @@ css path =
 view : Model -> Html Msg
 view model =
   let
-    questionContainer =
-      [ "padding" => "2vh 5vw 5vh 5vw"
-      , "overflow" => "hidden"
-      , "overflow-y" => "auto"
-      , "overflow-x" => "auto"
-      --, "background-color" => "aliceBlue" 
-      ]
-
     textfieldStyle = 
       style
       [ "width" => "100%"
@@ -181,6 +173,11 @@ view model =
     questionStyle =
       style
       [ "font-size" => "1.2em"
+      ]
+
+    listItemStyle =
+      style
+      [ "padding-top" => "4em"
       ]
 
     getMaxLength maxlength =
@@ -196,9 +193,10 @@ view model =
         False
 
     questions question =
-      li []
+      li [ listItemStyle ]
       [ Markdown.toHtml [ questionStyle ] question.question 
-      , div [ class "mdl-textfield mdl-js-textfield" ] 
+      -- , div [ class "mdl-textfield mdl-js-textfield" ] 
+      , div [ ] 
         [ textarea 
           [ on "input" (Json.map UpdateFieldOnInput targetValue)
           , onEnter NoOp (AddAnswer question)
