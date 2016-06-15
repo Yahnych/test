@@ -1,13 +1,12 @@
 module WritingAdvice exposing (init, update, view) --where
 
 import Html exposing (..)
-import Html.App as Html
+import Html.App as App
 import Html.Attributes exposing (..)
 import Questions exposing (..)
 import Essay exposing (..)
-import String
+import Markdown
 import Header exposing (..)
-import Data exposing (..)
 
 
 -- MODEL
@@ -26,7 +25,7 @@ init =
       Questions.init
   in
   { questions = questions'
-  , essay = Essay.init questions'
+  , essay = Essay.init 
   , header = Header.init
   }
   ![]
@@ -37,22 +36,38 @@ init =
 type Msg
   = UpdateQuestions Questions.Msg
   | UpdateHeader Header.Msg
-  | UpdateEssay Essay.Msg
+  | UpdateHtmlEssay Essay.Msg
+  | UpdateMarkdown --Questions.Model
   | NoOp
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update message model =
   case message of
+    {-
     UpdateQuestions msg ->
-      { model | questions = Questions.update msg model.questions } 
+      { model | questions = questions' msg } 
+      ![ snd(update (UpdateMarkdown (questions' msg)) model) ]
+
+    UpdateMarkdown questions ->
+      { model | essay = Essay.update (Essay.CreateMarkdown questions) model.essay }
+      ![]
+    -}
+    UpdateQuestions msg ->
+      let
+        model' = { model | questions =  Questions.update msg model.questions } 
+      in
+        update UpdateMarkdown model'
+
+    UpdateMarkdown ->
+      { model | essay = Essay.update (Essay.UpdateMarkdown model.questions) model.essay }
       ![]
 
     UpdateHeader msg ->
       { model | header = Header.update msg model.header }
       ![]
 
-    UpdateEssay msg ->
+    UpdateHtmlEssay msg ->
       { model | essay = Essay.update msg model.essay }
       ![]
     
@@ -107,16 +122,14 @@ view model =
   div [ class "mdl-grid", mainContainerStyle ]
     [ div 
        [ class "mdl-cell mdl-cell--6-col", questionContainerStyle ]
-       [ Html.map UpdateHeader (Header.view model.header)
+       [ App.map UpdateHeader (Header.view model.header)
        , h1 [ titleStyle ] [ text model.questions.title ]
-       , Html.map UpdateQuestions (Questions.view model.questions)
+       , App.map UpdateQuestions (Questions.view model.questions)
        ]
     , div 
        [ class "mdl-cell mdl-cell--6-col", essayContainerStyle ] 
-       [ Html.map UpdateEssay (Essay.view model.questions) ]
+       [ App.map UpdateHtmlEssay (Essay.view model.questions) 
+       , Markdown.toHtml [] model.essay.markdown
+       ]
     ]
-     {-
-      App.map UpdateQuestions (Questions.view model.questions)
-    , essayView model.questions
-     -}
 

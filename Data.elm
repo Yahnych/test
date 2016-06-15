@@ -1,6 +1,6 @@
 module Data exposing (..) --where
 
-import Markdown
+import Format exposing (..)
 
 {-
 My only suggested change at this time is to change question #4 to:
@@ -12,16 +12,15 @@ type alias Question =
   , paragraphId : Int
   , rows : Int
   , maxlength : Int
-  , format : Format
+  , format : Format.FormatStyle
   }
 
-type Format
-  = Normal
-  | Quotation
-  | AuthorOfQuotation
 
+title : String
 title = "Authors' Advice to Writers"
 
+
+instructions : String
 instructions = 
   """
 Answer the questions on the left to build your essay.
@@ -40,7 +39,7 @@ of up to 200 words. Copy the quotation directly into the following text field:
     , paragraphId = 0
     , rows = 7
     , maxlength = 700
-    , format = Quotation
+    , format = Format.Quotation
     }
   ,
     { question = 
@@ -50,7 +49,7 @@ Who wrote the quotation that you listed above?
     , paragraphId = 0
     , rows = 1
     , maxlength = 0
-    , format = AuthorOfQuotation
+    , format = Format.AuthorOfQuotation
     }
   ,
     { question = 
@@ -62,7 +61,7 @@ Copy the excerpt into the following text field (maximum 200 words):
     , paragraphId = 1
     , rows = 7
     , maxlength = 700
-    , format = Quotation
+    , format = Format.Quotation
     }
   ,
     { question = 
@@ -72,7 +71,7 @@ Who wrote the quotation that you listed above?
     , paragraphId = 1
     , rows = 1
     , maxlength = 0
-    , format = AuthorOfQuotation
+    , format = Format.AuthorOfQuotation
     }
   ,
     { question = 
@@ -84,7 +83,7 @@ important ideas?)
     , paragraphId = 2
     , rows = 7
     , maxlength = 0
-    , format = Normal
+    , format = Format.Normal
     }
   ,
     { question = 
@@ -96,7 +95,7 @@ writing excerpt and the author’s advice that you chose.
     , paragraphId = 2
     , rows = 7
     , maxlength = 0
-    , format = Normal
+    , format = Format.Normal
     }
   ,
     { question = 
@@ -108,7 +107,7 @@ prove your point.
     , paragraphId = 3
     , rows = 7
     , maxlength = 0
-    , format = Normal
+    , format = Format.Normal
     }
   ,
     { question = 
@@ -119,6 +118,6 @@ quality of the writing excerpt you chose?
     , paragraphId = 3
     , rows = 7
     , maxlength = 0
-    , format = Normal
+    , format = Format.Normal
     }
   ]

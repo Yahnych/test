@@ -1,11 +1,11 @@
-module Questions exposing (Model, Msg, init, update, view) --where
+module Questions exposing (..) --where
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Json.Decode as Json
 import Data exposing (..)
-import String
+import Format exposing (..)
 import Markdown
 
 
@@ -66,7 +66,7 @@ type alias Question =
   , paragraphId : Int
   , rows : Int
   , maxlength : Int
-  , format : Data.Format
+  , format : Format.FormatStyle
   }
 
 -- Sentence
@@ -153,6 +153,7 @@ css path =
 
 
 -- VIEW
+
 (=>) : a -> b -> ( a, b )
 (=>) = (,)
 
@@ -195,7 +196,6 @@ view model =
     questions question =
       li [ listItemStyle ]
       [ Markdown.toHtml [ questionStyle ] question.question 
-      -- , div [ class "mdl-textfield mdl-js-textfield" ] 
       , div [ ] 
         [ textarea 
           [ on "input" (Json.map UpdateFieldOnInput targetValue)
@@ -214,7 +214,7 @@ view model =
 
     answers item =
       div []
-      [ p [ ] [ text (toString(item.id + 1) ++ ". " ++ item.answer) ]
+      [ p [ ] [ text <| toString(item.id + 1) ++ ". " ++ item.answer ]
       ]
 
     titleStyle =
