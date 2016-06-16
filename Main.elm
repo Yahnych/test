@@ -1,6 +1,6 @@
 import Html exposing (..)
 import Html.App as Html
-import WritingAdvice exposing (init, view, update)
+import WritingAdvice exposing (init, view, update, subscriptions)
 --import Questions exposing (init, view, update)
 
 
@@ -11,7 +11,7 @@ main =
     { init = init
     , view = view
     , update = update
-    , subscriptions = (\_ -> Sub.none)
+    , subscriptions = subscriptions
     }
 
 

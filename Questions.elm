@@ -7,6 +7,7 @@ import Json.Decode as Json
 import Data exposing (..)
 import Format exposing (..)
 import Markdown
+import Defaults
 
 
 -- MODEL
@@ -145,12 +146,6 @@ onEnter fail success =
     on "keyup" (Json.map tagger keyCode)
 
 
--- VIEW
-
-css : String -> Html Msg
-css path =
-  node "link" [ rel "stylesheet", href path ] []
-
 
 -- VIEW
 
@@ -165,7 +160,7 @@ view model =
     textfieldStyle = 
       style
       [ "width" => "100%"
-      , "font-family" => "LibreBaskerville-Regular, serif"
+      , "font-family" => Defaults.essayFont
       , "font-size" => "1em"
       , "line-height" => "1.5em"
       , "padding" => "1em"
@@ -215,13 +210,6 @@ view model =
     answers item =
       div []
       [ p [ ] [ text <| toString(item.id + 1) ++ ". " ++ item.answer ]
-      ]
-
-    titleStyle =
-      style
-      [ "font-size" => "3.5em"
-      , "font-family" => "SuisseIntl-Thin"
-      , "padding-top" => "0.5em"
       ]
 
   in

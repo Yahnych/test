@@ -6,6 +6,7 @@ import String
 import Questions
 import Format
 import Markdown
+import Defaults
 
 
 -- MODEL
@@ -15,9 +16,9 @@ type alias Model =
   } 
 
 
-init : Model
-init = 
-  { markdown = ""
+init : String -> Model
+init markdown' = 
+  { markdown = markdown'
   } 
 
 
@@ -183,7 +184,7 @@ paragraphView model paragraphId =
       [ "text-indent" => "3em"
       , "line-height" =>  "2em" 
       , "font-size" => "1em"
-      , "font-family" => "LibreBaskerville-Regular, serif"
+      , "font-family" => Defaults.essayFont
       ]
 
   in

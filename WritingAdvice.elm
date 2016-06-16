@@ -1,4 +1,4 @@
-module WritingAdvice exposing (init, update, view) --where
+port module WritingAdvice exposing (init, update, view, subscriptions) --where
 
 import Html exposing (..)
 import Html.App as App
@@ -7,6 +7,7 @@ import Questions exposing (..)
 import Essay exposing (..)
 import Markdown
 import Header exposing (..)
+import Defaults
 
 
 -- MODEL
@@ -25,7 +26,7 @@ init =
       Questions.init
   in
   { questions = questions'
-  , essay = Essay.init 
+  , essay = Essay.init ""
   , header = Header.init
   }
   ![]
@@ -38,7 +39,12 @@ type Msg
   | UpdateHeader Header.Msg
   | UpdateHtmlEssay Essay.Msg
   | UpdateMarkdown --Questions.Model
+  | LoadSavedData String
   | NoOp
+
+
+-- A port to save the data
+port save : String -> Cmd msg
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -55,12 +61,27 @@ update message model =
     -}
     UpdateQuestions msg ->
       let
-        model' = { model | questions =  Questions.update msg model.questions } 
+        model' = { model | questions = Questions.update msg model.questions } 
       in
         update UpdateMarkdown model'
 
     UpdateMarkdown ->
-      { model | essay = Essay.update (Essay.UpdateMarkdown model.questions) model.essay }
+      let 
+        model' = 
+          { model 
+              | essay = Essay.update (Essay.UpdateMarkdown model.questions) model.essay 
+          }
+        
+        essay' =
+          .essay model'
+
+        markdown' =
+          .markdown essay'
+      in
+      model' ![ save markdown' ]
+
+    LoadSavedData loadedData ->
+      { model | essay = Essay.init loadedData }
       ![]
 
     UpdateHeader msg ->
@@ -74,6 +95,15 @@ update message model =
     NoOp ->
       model 
       ![]
+
+
+-- SUBSCRIPTIONS
+
+port load : (String -> msg) -> Sub msg
+
+subscriptions : Model -> Sub Msg
+subscriptions model = 
+  load LoadSavedData
 
 
 -- VIEW
@@ -105,7 +135,7 @@ view model =
       , "overflow-y" => "auto"
       , "overflow-x" => "auto"
       --, "background-color" => "seaGreen"
-      , "background-image" => "url(images/paper.png)" 
+      , "background-image" => ("url(" ++ Defaults.imagesLocation ++ "paper.png)") 
       , "-webkit-box-shadow" => "-3px 0px 20px 0px rgba(50, 50, 50, 0.4)"
       , "-moz-box-shadow" => "-3px 0px 20px 0px rgba(50, 50, 50, 0.4)"
       , "box-shadow" => "-3px 0px 20px 0px rgba(50, 50, 50, 0.4)"
@@ -113,21 +143,21 @@ view model =
     titleStyle =
       style
       [ "font-size" => "3.5em"
-      , "font-family" => "SuisseIntl-Thin"
+      , "font-family" => Defaults.titleFont
       , "padding-top" => "0.5em"
       ]
 
 
   in 
-  div [ class "mdl-grid", mainContainerStyle ]
+  div [ Html.Attributes.class "mdl-grid", mainContainerStyle ]
     [ div 
-       [ class "mdl-cell mdl-cell--6-col", questionContainerStyle ]
+       [ Html.Attributes.class "mdl-cell mdl-cell--6-col", questionContainerStyle ]
        [ App.map UpdateHeader (Header.view model.header)
        , h1 [ titleStyle ] [ text model.questions.title ]
        , App.map UpdateQuestions (Questions.view model.questions)
        ]
     , div 
-       [ class "mdl-cell mdl-cell--6-col", essayContainerStyle ] 
+       [ Html.Attributes.class "mdl-cell mdl-cell--6-col", essayContainerStyle ] 
        [ App.map UpdateHtmlEssay (Essay.view model.questions) 
        , Markdown.toHtml [] model.essay.markdown
        ]
