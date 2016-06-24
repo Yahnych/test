@@ -17,7 +17,6 @@ type alias Model =
   , instructions : String
   , questions : List Question
   , field : String
-  , previousField : String
   , numberOfParagraphs : Int
   --, answer : String
   --, essay : Essay
@@ -52,7 +51,6 @@ init =
   , instructions = Data.instructions 
   , questions = List.indexedMap createQuestion Data.questions
   , field = ""
-  , previousField = ""
   , numberOfParagraphs = numberOfParagraphs'
   } 
 
@@ -214,18 +212,4 @@ view model =
 
   in
      ol [] (List.map questions model.questions)
-  -- Old
-  {-
-  div [ class "mdl-cell mdl-cell--6-col", style questionContainer ]
-    [ img [ src "images/logoTVO_WritersDesk.png" ] [ ]
-    , h1 [ titleStyle ] [ text model.title ]
-    , ol [ ] (List.map questions model.questions)
-    -- Diagnostic
-    {-
-    , p [] [ text ("Paragraphs: " ++ toString(model.numberOfParagraphs))]
-    , p [] [ text model.field ]
-    , div [] (List.map answers model.questions)
-    -}
-    ]
-  -}
   
