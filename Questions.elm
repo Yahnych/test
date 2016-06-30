@@ -18,6 +18,7 @@ type alias Model =
   , questions : List Question
   , field : String
   , numberOfParagraphs : Int
+  , focusChanged : Bool
   --, answer : String
   --, essay : Essay
 
@@ -45,14 +46,36 @@ init =
       in 
         List.maximum paragraphIds |> Maybe.withDefault 0
 
+    firstQuestion =
+      List.head model'.questions 
+      |> Maybe.withDefault 
+        { question = ""
+        , answer = "This is a test"
+        , completed = False
+        , editing = False
+        , id = 0
+        , paragraphId = 0
+        , rows = 0
+        , maxlength = 0
+        , format = Format.Normal
+        }
+
+    firstAnswer =
+      firstQuestion.answer
+
+    model' =
+      { title = Data.title
+      , instructions = Data.instructions 
+      , questions = List.indexedMap createQuestion Data.questions
+      , field = ""
+      , focusChanged = False
+      , numberOfParagraphs = numberOfParagraphs'
+      } 
+
 
   in 
-  { title = Data.title
-  , instructions = Data.instructions 
-  , questions = List.indexedMap createQuestion Data.questions
-  , field = ""
-  , numberOfParagraphs = numberOfParagraphs'
-  } 
+    --{ model' | field = firstAnswer }
+    model'
 
 
 -- Question
@@ -104,21 +127,42 @@ update msg model =
     -- Update the model's `field` property each time the user
     -- types into an input field
     UpdateFieldOnInput string ->
-      { model | field = string }
+      { model 
+        | field = string
+        , focusChanged = False 
+      }
 
-    -- When the user selects and input field, Set the model's `field` 
-    -- property to whatever the curren value of that input field is 
+    -- When the user selects an input field, Set the model's `field` 
+    -- property to whatever the current value of that input field is 
     UpdateFieldOnFocus question ->
-      { model | field = question.answer }
+      let 
+        fieldValue answer =
+          if answer /= "" then
+            answer
+          else
+            ""
+
+      in
+      { model 
+        | field = fieldValue question.answer 
+        , focusChanged = True
+      }
 
     -- Update the question's `answer` property with the model's current
     -- field value, and update the model's list of questions
     AddAnswer question ->
+
       let
+        answer' =
+         if model.field /= "" then 
+            model.field 
+         else 
+            question.answer 
+
         questions' currentQuestion =
           if currentQuestion.id == question.id then
             { currentQuestion 
-              | answer = model.field
+              | answer = answer'
               , completed = True 
             }
           else
@@ -201,7 +245,7 @@ view model =
           , maxlength <| getMaxLength question.maxlength
           , autofocus <| setAutoFocus question
           ] 
-          []
+          [ text question.answer ]
         ]
       ]
 
@@ -211,5 +255,8 @@ view model =
       ]
 
   in
-     ol [] (List.map questions model.questions)
-  
+    div []
+     [ ol [] (List.map questions model.questions)
+     , p [] [ text <| "Field: " ++ model.field ]
+     ]
+     

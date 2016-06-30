@@ -11,17 +11,21 @@ require( 'material-design-lite/material.js' );
 var Elm = require( './Main' );
 var app = Elm.Main.embed( document.getElementById( 'main' ) );
 
+//:w
+//localStorage.clear();
+
 //Local storage
 //Save the data
 app.ports.save.subscribe(function(data){
 	localStorage.setItem("data", JSON.stringify(data));
-	console.log("Saving data...")
+	//console.log("Saving data...")
+	console.log(JSON.stringify(data))
 });
 
 //Load the data
 var savedData = localStorage.getItem("data");
 window.setTimeout(function(){
 	app.ports.load.send(JSON.parse(savedData));
-	console.log("Loaded data")
+	console.log("*** Loaded data")
 	console.log(savedData)
 });

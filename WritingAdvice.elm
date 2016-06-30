@@ -12,6 +12,7 @@ import Json.Encode
 import Json.Decode exposing ((:=))
 import Json.Decode.Pipeline
 import Format
+import Data
 
 
 -- MODEL
@@ -27,10 +28,10 @@ init : (Model, Cmd Msg)
 init =
   let 
     questions' =
-      Questions.init
+      Questions.init 
   in
   { questions = questions'
-  , essay = Essay.init ""
+  , essay = Essay.init questions' ""
   , header = Header.init
   }
   ![]
@@ -43,7 +44,7 @@ type Msg
   | UpdateHeader Header.Msg
   | UpdateHtmlEssay Essay.Msg
   | UpdateMarkdown --Questions.Model
-  | LoadSavedData String
+  -- | LoadSavedData String
   | SetQuestions Questions.Model
   | NoOp
 
@@ -70,7 +71,17 @@ update message model =
       let
         model' = { model | questions = Questions.update msg model.questions } 
       in
+      {-
+        if model'.questions.focusChanged then
+          update UpdateMarkdown model'
+      }
+      else
+      -} 
+        -- model' ![]
+        --model' ![ sendToStorage model'.questions ]
         update UpdateMarkdown model'
+    
+
 
     UpdateMarkdown ->
       let 
@@ -80,27 +91,51 @@ update message model =
           }
         
       in
+        update (UpdateHtmlEssay <| Essay.UpdateEssay model'.questions) model'
       -- model' ![ save markdown' ]
       -- model' ![ save model'.essay.markdown ]
-      model' ![ sendToStorage model'.questions ]
+      -- model' ![]
+      -- model' ![ sendToStorage model'.questions ]
 
+    {-
     LoadSavedData loadedData ->
       { model | essay = Essay.init loadedData }
       ![]
+    -}
 
-    SetQuestions questionsModel ->
-      -- { model | questions = questionsModel }
-      model
-      ![] 
-
+    UpdateHtmlEssay msg ->
+      let
+        model' = { model | essay = Essay.update msg model.essay }
+      in
+        model' ![ sendToStorage model'.questions ]
+        -- model' ![]
+    
     UpdateHeader msg ->
       { model | header = Header.update msg model.header }
       ![]
 
-    UpdateHtmlEssay msg ->
-      { model | essay = Essay.update msg model.essay }
-      ![]
-    
+    SetQuestions questionsModel ->
+      let 
+        model' = 
+          { model 
+              | questions = questionsModel 
+              , essay = Essay.init questionsModel ""
+          }
+        {-
+        model'' =
+          { model'
+              | essay = Essay.update (Essay.UpdateMarkdown model'.questions) model'.essay
+          }
+        model''' =
+          { model''
+              | essay = Essay.update (Essay.UpdateEssay model''.questions) model''.essay
+          }
+        -}
+      in
+        -- update (UpdateHtmlEssay <| Essay.UpdateEssay model'.questions) model'
+        -- update (UpdateQuestions <| Questions.NoOp ) model'
+        model' ![]
+
     NoOp ->
       model 
       ![]
@@ -125,6 +160,7 @@ encodeQuestion model =
     , ("questions", Json.Encode.list (List.map encodeQuestions model.questions))
     , ("field", Json.Encode.string model.field)
     , ("numberOfParagraphs", Json.Encode.int model.numberOfParagraphs)
+    , ("focusChanged", Json.Encode.bool model.focusChanged)
     ]
 
 
@@ -136,7 +172,7 @@ encodeQuestions model =
     , ("completed", Json.Encode.bool model.completed)
     , ("editing", Json.Encode.bool model.editing)
     , ("id", Json.Encode.int model.id)
-    , ("paragraphId", Json.Encode.int model.id)
+    , ("paragraphId", Json.Encode.int model.paragraphId)
     , ("rows", Json.Encode.int model.rows)
     , ("maxlength", Json.Encode.int model.maxlength)
     , ("format", encodeFormatStyle model.format)
@@ -164,12 +200,13 @@ decodeQuestionsModel questionsModelJson =
 
 questionsModelDecoder : Json.Decode.Decoder Questions.Model
 questionsModelDecoder =
-  Json.Decode.object5 Questions.Model
+  Json.Decode.object6 Questions.Model
     ("title" := Json.Decode.string)
     ("instructions" := Json.Decode.string)
     ("questions" := Json.Decode.list questionsDecoder)
     ("field" := Json.Decode.string)
     ("numberOfParagraphs" := Json.Decode.int)
+    ("focusChanged" := Json.Decode.bool)
 
 
 questionsDecoder : Json.Decode.Decoder Questions.Question
@@ -235,6 +272,7 @@ subscriptions model =
 
 -- VIEW
 
+(=>) : a -> b -> ( a, b )
 (=>) = (,)
 
 view : Model -> Html Msg
@@ -285,7 +323,7 @@ view model =
        ]
     , div 
        [ Html.Attributes.class "mdl-cell mdl-cell--6-col", essayContainerStyle ] 
-       [ App.map UpdateHtmlEssay (Essay.view model.questions) 
+       [ App.map UpdateHtmlEssay (Essay.view model.essay) 
        , Markdown.toHtml [] model.essay.markdown
        ]
     ]

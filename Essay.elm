@@ -13,12 +13,14 @@ import Defaults
 
 type alias Model = 
   { markdown : String
+  , questions : Questions.Model
   } 
 
 
-init : String -> Model
-init markdown' = 
+init : Questions.Model -> String -> Model
+init questions' markdown' = 
   { markdown = markdown'
+  , questions = questions'
   } 
 
 
@@ -26,6 +28,7 @@ init markdown' =
 
 type Msg 
   = UpdateMarkdown Questions.Model
+  | UpdateEssay Questions.Model
   | NoOp
 
 
@@ -34,6 +37,9 @@ update message model =
   case message of 
     UpdateMarkdown questions ->
       { model | markdown = createMarkdown questions }
+
+    UpdateEssay questions' ->
+      { model | questions = questions' }
 
     NoOp ->
       model
@@ -71,7 +77,6 @@ format question =
 -- MARKDOWN
 
 -- Generates the markdown file based on the currently answered questions
-
 createMarkdown : Questions.Model -> String
 createMarkdown model =
   let 
@@ -86,19 +91,18 @@ createMarkdown model =
       "#" ++ model.title ++ paragraphBreak
 
     essayContent =
-      List.map (paragraphFormat model) [0 .. model.numberOfParagraphs]
+      List.map paragraphFormat [0 .. model.numberOfParagraphs ]
       |> String.concat
 
-    paragraphFormat model paragraphId =
+    paragraphFormat paragraphId =
       let
         completeParagraph =
-          List.map sentenceFormat (sentencesBelongingToParagraph model paragraphId)
+          List.map sentenceFormat <| sentencesBelongingToParagraph model paragraphId
 
         firstSentence =
           List.head completeParagraph 
           |> Maybe.withDefault ""
           |> String.append indent
-
 
         restOfParagraph =
           List.tail completeParagraph 
@@ -124,14 +128,13 @@ createMarkdown model =
   in
     title ++ essayContent
 
-
 -- VIEW
 
 (=>) : a -> b -> ( a, b )
 (=>) = (,)
 
 
-view : Questions.Model -> Html Msg
+view : Model -> Html Msg
 view model = 
   let
     instructionStyle =
@@ -144,10 +147,10 @@ view model =
     -- If any of the questions have been answered, display the paragraphs.
     -- Otherwise, display the instruction text
     essayContent =
-      if List.length (answeredQuestions model) /= 0 then
-        div [] (List.map (paragraphView model) [0 .. model.numberOfParagraphs])
+      if List.length (answeredQuestions model.questions) /= 0 then
+        div [] (List.map (paragraphView model) [0 .. model.questions.numberOfParagraphs])
       else
-        div [ instructionStyle ] [ text <| "(" ++ model.instructions ++ ")"  ]
+        div [ instructionStyle ] [ text <| "(" ++ model.questions.instructions ++ ")"  ]
   in
   div [ ] 
     [ titleView model
@@ -156,7 +159,7 @@ view model =
 
 
 -- The title view
-titleView : Questions.Model -> Html a
+titleView : Model -> Html Msg
 titleView model =
   let
     titleStyle = 
@@ -167,17 +170,17 @@ titleView model =
       , "padding-bottom" => "1em"
       ]
   in
-    h1 [ titleStyle ] [ text model.title ]
+    h1 [ titleStyle ] [ text model.questions.title ]
 
 -- The paragraph view
-paragraphView : Questions.Model -> Int -> Html Msg
+paragraphView : Model -> Int -> Html Msg
 paragraphView model paragraphId =
   let
   
     -- Create the paragraph by mapping the sentences that belong to the 
     -- current paragraph
     paragraph =
-      (List.map sentenceView (sentencesBelongingToParagraph model paragraphId))
+      (List.map sentenceView (sentencesBelongingToParagraph model.questions paragraphId))
 
     paragraphStyle =
       style 
@@ -225,3 +228,34 @@ sentenceView question =
   -- span [ sentenceStyle ] [ Markdown.toHtml [] (format question) ]
   Markdown.toHtml [ sentenceStyle, class "formattedSentence" ] (format question)
   -- span [ sentenceStyle ] [ text <| format question ]
+
+
+-- DIAGNOSTIC
+
+{-
+createMarkdown : Questions.Model -> String
+createMarkdown model =
+  let
+
+    answersBelongingToParagraph paragraphId =
+      --List.map (\question -> question.answer) ((questionsBelongingToParagraph paragraphId) model.questions)
+      List.map (\question -> question.answer) (questionsBelongingToParagraph paragraphId)
+      |> String.concat
+    
+    questionsBelongingToParagraph paragraphId =
+      List.filter (\question -> question.paragraphId == paragraphId) model.questions
+      -- |> String.concat
+
+    paragraph paragraphId =
+      --List.map (answersBelongingToParagraph paragraphId) model.questions
+      answersBelongingToParagraph paragraphId
+      --|> String.concat
+
+    paragraphs =
+      List.map paragraph [ 0 .. model.numberOfParagraphs ] 
+      |> String.concat
+
+  in
+    paragraphs
+-} 
+
