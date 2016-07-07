@@ -9,6 +9,11 @@ import Format exposing (..)
 import Markdown
 import Defaults
 
+import Material
+import Material.Scheme
+import Material.Textfield as Textfield
+import Material.Options exposing (css)
+
 
 -- MODEL
 
@@ -19,6 +24,7 @@ type alias Model =
   , field : String
   , numberOfParagraphs : Int
   , focusChanged : Bool
+  --, mdl : Material.Model
   --, answer : String
   --, essay : Essay
 
@@ -70,6 +76,7 @@ init =
       , field = ""
       , focusChanged = False
       , numberOfParagraphs = numberOfParagraphs'
+      --, mdl = Material.model
       } 
 
 
@@ -117,10 +124,11 @@ type Msg
   = UpdateFieldOnInput String
   | UpdateFieldOnFocus Question
   | AddAnswer Question 
+  --| MDL Material.Msg
   | NoOp
 
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
     
@@ -131,11 +139,15 @@ update msg model =
         | field = string
         , focusChanged = False 
       }
+      ! []
 
     -- When the user selects an input field, Set the model's `field` 
     -- property to whatever the current value of that input field is 
     UpdateFieldOnFocus question ->
       let 
+
+        -- This is required so that the existing field value doesn't replace
+        -- an existing answer with a blank string
         fieldValue answer =
           if answer /= "" then
             answer
@@ -147,12 +159,17 @@ update msg model =
         | field = fieldValue question.answer 
         , focusChanged = True
       }
+      ! []
 
     -- Update the question's `answer` property with the model's current
     -- field value, and update the model's list of questions
     AddAnswer question ->
 
       let
+
+        -- This is required so that the existing field value doesn't replace
+        -- an existing answer with a blank string. This happens when a new
+        -- model was loaded from local storage
         answer' =
          if model.field /= "" then 
             model.field 
@@ -171,9 +188,16 @@ update msg model =
         { model
             | questions = List.map questions' model.questions 
         } 
+      ! []
     
+    {-
+    MDL msg ->
+      Material.update MDL msg model
+    -}
+
     NoOp ->
       model 
+      ! []
 
 
 -- A function to check whether the user has pressed the Enter key (code 13).
@@ -233,7 +257,17 @@ view model =
     questions question =
       li [ listItemStyle ]
       [ Markdown.toHtml [ questionStyle ] question.question 
-      , div [ ] 
+      , div [ ]
+        {-
+        [ Textfield.render MDL [0] model.mdl
+          [ Textfield.label "Multiline with 6 rows"
+          , Textfield.floatingLabel
+          , Textfield.textarea
+          , Textfield.rows 6
+          ]
+        ] 
+        -}
+        
         [ textarea 
           [ on "input" (Json.map UpdateFieldOnInput targetValue)
           , onEnter NoOp (AddAnswer question)
@@ -248,6 +282,7 @@ view model =
           [ text question.answer ]
         ]
       ]
+    |> Material.Scheme.top
 
     answers item =
       div []
@@ -257,6 +292,5 @@ view model =
   in
     div []
      [ ol [] (List.map questions model.questions)
-     , p [] [ text <| "Field: " ++ model.field ]
      ]
      

@@ -13,6 +13,7 @@ import Json.Decode exposing ((:=))
 import Json.Decode.Pipeline
 import Format
 import Data
+import Material
 
 
 -- MODEL
@@ -58,61 +59,57 @@ port save : Json.Encode.Value -> Cmd msg
 update : Msg -> Model -> (Model, Cmd Msg)
 update message model =
   case message of
-    {-
-    UpdateQuestions msg ->
-      { model | questions = questions' msg } 
-      ![ snd(update (UpdateMarkdown (questions' msg)) model) ]
-
-    UpdateMarkdown questions ->
-      { model | essay = Essay.update (Essay.CreateMarkdown questions) model.essay }
-      ![]
-    -}
     UpdateQuestions msg ->
       let
-        model' = { model | questions = Questions.update msg model.questions } 
-      in
-      {-
-        if model'.questions.focusChanged then
-          update UpdateMarkdown model'
-      }
-      else
-      -} 
-        -- model' ![]
-        --model' ![ sendToStorage model'.questions ]
-        update UpdateMarkdown model'
-    
+        (questions', questionsFx) 
+          = Questions.update msg model.questions
 
+        model' 
+          = { model | questions = questions' } 
+        
+        -- We have to recurrsively call `update` before mapping
+        -- the child modules effects
+        (model'', fx'') = update UpdateMarkdown model'
+      in
+        model'' ! [ Cmd.map UpdateQuestions questionsFx, fx'' ]
 
     UpdateMarkdown ->
       let 
+        (essay', essayFx) = 
+          Essay.update (Essay.UpdateMarkdown model.questions) model.essay
+        
+        {-
+        (header', headerFx) = 
+          Header.update (Header.UpdateMarkdown essay'.markdown) model.header
+        -}
+
         model' = 
           { model 
-              | essay = Essay.update (Essay.UpdateMarkdown model.questions) model.essay 
+              | essay = essay'
+              --, header = header' 
           }
         
       in
         update (UpdateHtmlEssay <| Essay.UpdateEssay model'.questions) model'
-      -- model' ![ save markdown' ]
-      -- model' ![ save model'.essay.markdown ]
-      -- model' ![]
-      -- model' ![ sendToStorage model'.questions ]
-
-    {-
-    LoadSavedData loadedData ->
-      { model | essay = Essay.init loadedData }
-      ![]
-    -}
 
     UpdateHtmlEssay msg ->
       let
-        model' = { model | essay = Essay.update msg model.essay }
+        (essay', essayFx) = 
+          Essay.update msg model.essay
+
+        model' = { model | essay = essay' }
       in
-        model' ![ sendToStorage model'.questions ]
-        -- model' ![]
+        model' ! 
+          [ sendToStorage model'.questions 
+          , Cmd.map UpdateHtmlEssay essayFx
+          ]
     
     UpdateHeader msg ->
-      { model | header = Header.update msg model.header }
-      ![]
+      let
+        (header', fx) = Header.update msg model.header
+      in
+      { model | header = header' }
+      ![ Cmd.map UpdateHeader fx ]
 
     SetQuestions questionsModel ->
       let 
@@ -121,19 +118,7 @@ update message model =
               | questions = questionsModel 
               , essay = Essay.init questionsModel ""
           }
-        {-
-        model'' =
-          { model'
-              | essay = Essay.update (Essay.UpdateMarkdown model'.questions) model'.essay
-          }
-        model''' =
-          { model''
-              | essay = Essay.update (Essay.UpdateEssay model''.questions) model''.essay
-          }
-        -}
       in
-        -- update (UpdateHtmlEssay <| Essay.UpdateEssay model'.questions) model'
-        -- update (UpdateQuestions <| Questions.NoOp ) model'
         model' ![]
 
     NoOp ->
@@ -198,7 +183,9 @@ decodeQuestionsModel questionsModelJson =
   Json.Decode.decodeValue questionsModelDecoder questionsModelJson
 
 
+ 
 questionsModelDecoder : Json.Decode.Decoder Questions.Model
+--questionsModelDecoder : Json.Decode.Decoder (Material.Model -> Questions.Model)
 questionsModelDecoder =
   Json.Decode.object6 Questions.Model
     ("title" := Json.Decode.string)
@@ -324,7 +311,7 @@ view model =
     , div 
        [ Html.Attributes.class "mdl-cell mdl-cell--6-col", essayContainerStyle ] 
        [ App.map UpdateHtmlEssay (Essay.view model.essay) 
-       , Markdown.toHtml [] model.essay.markdown
+       --, Markdown.toHtml [] model.essay.markdown
        ]
     ]
 

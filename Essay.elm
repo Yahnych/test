@@ -1,4 +1,4 @@
-module Essay exposing (..) --where
+port module Essay exposing (..) --where
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -8,12 +8,19 @@ import Format
 import Markdown
 import Defaults
 
+import Material
+import Material.Scheme
+import Material.Button as Button
+import Material.Tooltip as Tooltip
+import Material.Options exposing (css)
+
 
 -- MODEL
 
 type alias Model = 
   { markdown : String
   , questions : Questions.Model
+  , mdl : Material.Model
   } 
 
 
@@ -21,28 +28,58 @@ init : Questions.Model -> String -> Model
 init questions' markdown' = 
   { markdown = markdown'
   , questions = questions'
+  , mdl = Material.model
   } 
 
 
 -- UPDATE
 
 type Msg 
-  = UpdateMarkdown Questions.Model
+  = MDL Material.Msg
+  | Download
+  | Pdf
+  | UpdateMarkdown Questions.Model
   | UpdateEssay Questions.Model
   | NoOp
 
 
-update: Msg -> Model -> Model
+port download : (String, String) -> Cmd msg
+
+port pdf : (String, String) -> Cmd msg
+
+
+update: Msg -> Model -> (Model, Cmd Msg)
 update message model = 
   case message of 
+    MDL msg ->
+      Material.update MDL msg model
+
+    Pdf ->
+      let
+        fileName = 
+          Defaults.projectTitle ++ ".pdf"
+      in
+      model ! [ pdf (Defaults.projectTitle, model.markdown) ]
+
+    Download ->
+      let
+        fileName = 
+          Defaults.projectTitle ++ ".doc"
+      in
+      model ! [ download (fileName, model.markdown) ]
+      --model ! []
+
     UpdateMarkdown questions ->
       { model | markdown = createMarkdown questions }
+      ! []
 
     UpdateEssay questions' ->
       { model | questions = questions' }
+      ! []
 
     NoOp ->
       model
+      ! []
 
 
 -- HELPER FUNCTIONS
@@ -88,7 +125,7 @@ createMarkdown model =
     indent = "&ensp;&ensp;&ensp;&ensp;&ensp;"
 
     title =
-      "#" ++ model.title ++ paragraphBreak
+      "# " ++ model.title ++ paragraphBreak
 
     essayContent =
       List.map paragraphFormat [0 .. model.numberOfParagraphs ]
@@ -133,6 +170,8 @@ createMarkdown model =
 (=>) : a -> b -> ( a, b )
 (=>) = (,)
 
+type alias Mdl = 
+  Material.Model 
 
 view : Model -> Html Msg
 view model = 
@@ -152,11 +191,56 @@ view model =
       else
         div [ instructionStyle ] [ text <| "(" ++ model.questions.instructions ++ ")"  ]
   in
-  div [ ] 
-    [ titleView model
+  div [ id "essay" ] 
+    [ mdlView model
+    , titleView model
     , essayContent
     ]
+  {-
+  div [ id "essay" ] 
+    [ Markdown.toHtml [] model.markdown 
+    ]
+  -}
 
+mdlView model =
+    let
+    buttonContainerStyle =
+      style 
+        [ "width" => "100%"
+        , "height" => "50px"
+        , "display" => "block"
+        , "clear" => "both"
+        -- , "background-color" => "aliceBlue"
+        ]
+    in 
+
+    div [ buttonContainerStyle ]
+    [ Button.render MDL [0] model.mdl
+        [ Button.onClick Download 
+        , Button.ripple
+        , Tooltip.attach MDL [3]
+        , css "float" "right"
+        ]
+        [ text "word" ]
+    , Tooltip.render MDL [3] model.mdl
+        [ Tooltip.bottom
+        , Tooltip.large
+        ]
+        [ text "Edit or save in Microsoft Word" ]
+    , Button.render MDL [1] model.mdl
+        [ Button.onClick Pdf
+        , Button.ripple
+        , Tooltip.attach MDL [4] 
+        , css "float" "right"
+        ]
+        [ text "pdf" ]
+    , Tooltip.render MDL [4] model.mdl
+        [ Tooltip.bottom
+        , Tooltip.large
+        ]
+        [ text "Open as PDF to print or save" ]
+    ]
+  --|> Material.Scheme.top
 
 -- The title view
 titleView : Model -> Html Msg
