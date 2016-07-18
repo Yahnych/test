@@ -30,6 +30,14 @@ type alias Model =
 
   }
 
+type alias Content = 
+  { instructions : String
+  , questions : List Question
+  , field : String
+  , numberOfParagraphs : Int
+  , focusChanged : Bool
+  }
+
 init : Model
 init =
   let
