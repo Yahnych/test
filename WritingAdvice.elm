@@ -32,7 +32,7 @@ init =
       Questions.init 
   in
   { questions = questions'
-  , essay = Essay.init questions' ""
+  , essay = Essay.init questions'.content ""
   , header = Header.init
   }
   ![]
@@ -46,7 +46,7 @@ type Msg
   | UpdateHtmlEssay Essay.Msg
   | UpdateMarkdown --Questions.Model
   -- | LoadSavedData String
-  | SetQuestions Questions.Model
+  | SetQuestions Questions.Content
   | NoOp
 
 
@@ -76,7 +76,7 @@ update message model =
     UpdateMarkdown ->
       let 
         (essay', essayFx) = 
-          Essay.update (Essay.UpdateMarkdown model.questions) model.essay
+          Essay.update (Essay.UpdateMarkdown model.questions.content) model.essay
         
         {-
         (header', headerFx) = 
@@ -90,7 +90,7 @@ update message model =
           }
         
       in
-        update (UpdateHtmlEssay <| Essay.UpdateEssay model'.questions) model'
+        update (UpdateHtmlEssay <| Essay.UpdateEssay model'.questions.content) model'
 
     UpdateHtmlEssay msg ->
       let
@@ -100,7 +100,7 @@ update message model =
         model' = { model | essay = essay' }
       in
         model' ! 
-          [ sendToStorage model'.questions 
+          [ sendToStorage model'.questions.content 
           , Cmd.map UpdateHtmlEssay essayFx
           ]
     
@@ -111,12 +111,17 @@ update message model =
       { model | header = header' }
       ![ Cmd.map UpdateHeader fx ]
 
-    SetQuestions questionsModel ->
+    SetQuestions questionsContent ->
       let 
+        questionsModel' currentQuestionsModel =
+          { currentQuestionsModel
+              | content = questionsContent
+          }
+
         model' = 
           { model 
-              | questions = questionsModel 
-              , essay = Essay.init questionsModel ""
+              | questions = questionsModel' model.questions 
+              , essay = Essay.init questionsContent ""
           }
       in
         model' ![]
@@ -134,10 +139,10 @@ update message model =
 encodeJson : Model -> Json.Encode.Value
 encodeJson model =
   Json.Encode.object
-    [ ("questions", encodeQuestion model.questions) ]
+    [ ("questions", encodeQuestion model.questions.content) ]
 
 
-encodeQuestion : Questions.Model -> Json.Encode.Value
+encodeQuestion : Questions.Content -> Json.Encode.Value
 encodeQuestion model =
   Json.Encode.object
     [ ("title", Json.Encode.string model.title)
@@ -178,16 +183,16 @@ encodeFormatStyle formatStyle =
 
 -- Decoding
 
-decodeQuestionsModel : Json.Decode.Value -> Result String Questions.Model
+decodeQuestionsModel : Json.Decode.Value -> Result String Questions.Content
 decodeQuestionsModel questionsModelJson =
   Json.Decode.decodeValue questionsModelDecoder questionsModelJson
 
 
  
-questionsModelDecoder : Json.Decode.Decoder Questions.Model
+questionsModelDecoder : Json.Decode.Decoder Questions.Content
 --questionsModelDecoder : Json.Decode.Decoder (Material.Model -> Questions.Model)
 questionsModelDecoder =
-  Json.Decode.object6 Questions.Model
+  Json.Decode.object6 Questions.Content
     ("title" := Json.Decode.string)
     ("instructions" := Json.Decode.string)
     ("questions" := Json.Decode.list questionsDecoder)
@@ -237,12 +242,13 @@ loadFromStorage questionsModelJson =
   case (decodeQuestionsModel questionsModelJson) of
     Ok model -> 
       SetQuestions model
+      --SetQuestions model.questions.content
 
     _ -> 
       NoOp
 
 
-sendToStorage : Questions.Model -> Cmd Msg
+sendToStorage : Questions.Content -> Cmd Msg
 sendToStorage model =
   encodeQuestion model |> save
 
@@ -305,7 +311,7 @@ view model =
     [ div 
        [ Html.Attributes.class "mdl-cell mdl-cell--6-col", questionContainerStyle ]
        [ App.map UpdateHeader (Header.view model.header)
-       , h1 [ titleStyle ] [ text model.questions.title ]
+       , h1 [ titleStyle ] [ text model.questions.content.title ]
        , App.map UpdateQuestions (Questions.view model.questions)
        ]
     , div 

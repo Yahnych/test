@@ -18,20 +18,14 @@ import Material.Options exposing (css)
 -- MODEL
 
 type alias Model = 
-  { title : String
-  , instructions : String
-  , questions : List Question
-  , field : String
-  , numberOfParagraphs : Int
-  , focusChanged : Bool
+  { content : Content 
   --, mdl : Material.Model
-  --, answer : String
-  --, essay : Essay
 
   }
 
 type alias Content = 
-  { instructions : String
+  { title : String
+  , instructions : String
   , questions : List Question
   , field : String
   , numberOfParagraphs : Int
@@ -61,7 +55,7 @@ init =
         List.maximum paragraphIds |> Maybe.withDefault 0
 
     firstQuestion =
-      List.head model'.questions 
+      List.head model'.content.questions 
       |> Maybe.withDefault 
         { question = ""
         , answer = "This is a test"
@@ -77,7 +71,7 @@ init =
     firstAnswer =
       firstQuestion.answer
 
-    model' =
+    content' =
       { title = Data.title
       , instructions = Data.instructions 
       , questions = List.indexedMap createQuestion Data.questions
@@ -87,6 +81,9 @@ init =
       --, mdl = Material.model
       } 
 
+    model' = 
+      { content = content' 
+      }
 
   in 
     --{ model' | field = firstAnswer }
@@ -143,9 +140,16 @@ update msg model =
     -- Update the model's `field` property each time the user
     -- types into an input field
     UpdateFieldOnInput string ->
+      let
+        content' modelContent =
+          { modelContent
+              | field = string
+              , focusChanged = False 
+          }
+
+      in
       { model 
-        | field = string
-        , focusChanged = False 
+          | content = content' model.content
       }
       ! []
 
@@ -162,10 +166,14 @@ update msg model =
           else
             ""
 
+        content' modelContent =
+          { modelContent
+              | field = fieldValue question.answer 
+              , focusChanged = True
+          }
       in
       { model 
-        | field = fieldValue question.answer 
-        , focusChanged = True
+          | content = content' model.content
       }
       ! []
 
@@ -179,8 +187,8 @@ update msg model =
         -- an existing answer with a blank string. This happens when a new
         -- model was loaded from local storage
         answer' =
-         if model.field /= "" then 
-            model.field 
+         if model.content.field /= "" then 
+            model.content.field 
          else 
             question.answer 
 
@@ -192,10 +200,16 @@ update msg model =
             }
           else
             currentQuestion
+
+        content' modelContent =
+          { modelContent
+              | questions = List.map questions' modelContent.questions 
+          }
+
       in
-        { model
-            | questions = List.map questions' model.questions 
-        } 
+        { model 
+            | content = content' model.content
+        }
       ! []
     
     {-
@@ -299,6 +313,6 @@ view model =
 
   in
     div []
-     [ ol [] (List.map questions model.questions)
+     [ ol [] (List.map questions model.content.questions)
      ]
      

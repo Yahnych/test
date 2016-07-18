@@ -19,12 +19,12 @@ import Material.Options exposing (css)
 
 type alias Model = 
   { markdown : String
-  , questions : Questions.Model
+  , questions : Questions.Content
   , mdl : Material.Model
   } 
 
 
-init : Questions.Model -> String -> Model
+init : Questions.Content -> String -> Model
 init questions' markdown' = 
   { markdown = markdown'
   , questions = questions'
@@ -38,8 +38,8 @@ type Msg
   = MDL Material.Msg
   | Download
   | Pdf
-  | UpdateMarkdown Questions.Model
-  | UpdateEssay Questions.Model
+  | UpdateMarkdown Questions.Content
+  | UpdateEssay Questions.Content
   | NoOp
 
 
@@ -85,14 +85,14 @@ update message model =
 -- HELPER FUNCTIONS
 
 -- Find only the questions that have been answered
-answeredQuestions : Questions.Model -> List Questions.Question
+answeredQuestions : Questions.Content -> List Questions.Question
 answeredQuestions model =
   List.filter (\question -> not (String.isEmpty question.answer)) model.questions
 
 
 -- Display only the answered questions that belong to this paragraph. This is determined
 -- by the `paragraphId` that the user assigned in the `Data` file 
-sentencesBelongingToParagraph : Questions.Model -> Int -> List Questions.Question
+sentencesBelongingToParagraph : Questions.Content -> Int -> List Questions.Question
 sentencesBelongingToParagraph model paragraphId =
   List.filter (\question -> question.paragraphId == paragraphId) (answeredQuestions model)
 
@@ -114,7 +114,7 @@ format question =
 -- MARKDOWN
 
 -- Generates the markdown file based on the currently answered questions
-createMarkdown : Questions.Model -> String
+createMarkdown : Questions.Content -> String
 createMarkdown model =
   let 
     paragraphBreak =
