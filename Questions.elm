@@ -129,10 +129,18 @@ type alias Essay =
 
 -- UPDATE
 
+{-
 type Msg
   = UpdateFieldOnInput String
   | UpdateFieldOnFocus Question
   | AddAnswer Question 
+  | MDL Material.Msg
+  | CheckForCompletion
+  | NoOp
+-}
+
+type Msg
+  = UpdateField Question String
   | MDL Material.Msg
   | CheckForCompletion
   | NoOp
@@ -141,7 +149,7 @@ type Msg
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    
+   {- 
     -- Update the model's `field` property each time the user
     -- types into an input field
     UpdateFieldOnInput string ->
@@ -232,6 +240,7 @@ update msg model =
             | content = content' model.content
         }
       ! []
+    -}
     
     MDL msg ->
       Material.update MDL msg model
@@ -282,6 +291,35 @@ update msg model =
       }
       ! []
 
+    UpdateField question inputString ->
+      let
+        completed' =
+          if String.isEmpty inputString then
+            False
+          else
+            True
+
+        questions' currentQuestion =
+          if currentQuestion.id == question.id then
+            { currentQuestion 
+              | answer = inputString
+              , completed = completed' 
+            }
+          else
+            currentQuestion
+
+        
+
+        content' modelContent =
+          { modelContent
+            | questions = List.map questions' modelContent.questions
+          }
+
+      in
+        { model 
+            | content = content' model.content
+        }
+        ! []
 
     NoOp ->
       model 
@@ -454,11 +492,23 @@ view model =
       [ img [ (src <| checkbox question.completed), checkboxStyle ] []
       , Markdown.toHtml [ questionStyle ] question.question 
       , div [ ]
+        {-
         [ textarea 
           [ on "input" (Json.map UpdateFieldOnInput targetValue)
           , onEnter NoOp (AddAnswer question)
           , onBlur (AddAnswer question)
           , onFocus (UpdateFieldOnFocus question)
+          , class "mdl-textfield__input"
+          , rows question.rows
+          , textfieldStyle
+          , maxlength <| getMaxLength question.maxlength
+          , autofocus <| setAutoFocus question
+          ] 
+          [ text question.answer ]
+        ]
+        -}
+        [ textarea 
+          [ on "input" (Json.map (UpdateField question) targetValue)
           , class "mdl-textfield__input"
           , rows question.rows
           , textfieldStyle
