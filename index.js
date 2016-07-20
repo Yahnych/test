@@ -31,7 +31,7 @@ var app = Elm.Main.embed( document.getElementById( 'main' ) );
 //Save the data
 app.ports.save.subscribe(function(data){
 	localStorage.setItem("data", JSON.stringify(data));
-	//console.log("Saving data...")
+	console.log("*** Saving data...")
 	console.log(JSON.stringify(data))
 });
 

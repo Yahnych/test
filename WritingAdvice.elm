@@ -112,10 +112,35 @@ update message model =
       ![ Cmd.map UpdateHeader fx ]
 
     SetQuestions questionsContent ->
-      let 
+      let
+        
+        {- 
+        firstQuestion =
+          List.head questionsContent.questions 
+          |> Maybe.withDefault 
+            { question = ""
+            , answer = "This is a test"
+            , completed = False
+            , editing = False
+            , id = 0
+            , paragraphId = 0
+            , rows = 0
+            , maxlength = 0
+            , format = Format.Normal
+            }
+
+        firstAnswer =
+          firstQuestion.answer
+
+        content' =
+          { questionsContent
+              | field = firstAnswer
+          }
+        -}
+
         questionsModel' currentQuestionsModel =
           { currentQuestionsModel
-              | content = questionsContent
+              | content = questionsContent  --content'
           }
 
         model' = 

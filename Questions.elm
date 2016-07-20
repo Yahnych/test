@@ -8,19 +8,22 @@ import Data exposing (..)
 import Format exposing (..)
 import Markdown
 import Defaults
+import String
 
 import Material
 import Material.Scheme
 import Material.Textfield as Textfield
+import Material.Toggles as Toggles
 import Material.Options exposing (css)
+import Material.Button as Button
 
 
 -- MODEL
 
 type alias Model = 
   { content : Content 
-  --, mdl : Material.Model
-
+  , mdl : Material.Model
+  , completionMessage : String
   }
 
 type alias Content = 
@@ -75,18 +78,19 @@ init =
       { title = Data.title
       , instructions = Data.instructions 
       , questions = List.indexedMap createQuestion Data.questions
-      , field = ""
+      , field = "" 
       , focusChanged = False
       , numberOfParagraphs = numberOfParagraphs'
       --, mdl = Material.model
       } 
 
     model' = 
-      { content = content' 
+      { content = content'
+      , mdl = Material.model
+      , completionMessage = ""
       }
 
   in 
-    --{ model' | field = firstAnswer }
     model'
 
 
@@ -129,7 +133,8 @@ type Msg
   = UpdateFieldOnInput String
   | UpdateFieldOnFocus Question
   | AddAnswer Question 
-  --| MDL Material.Msg
+  | MDL Material.Msg
+  | CheckForCompletion
   | NoOp
 
 
@@ -161,14 +166,14 @@ update msg model =
         -- This is required so that the existing field value doesn't replace
         -- an existing answer with a blank string
         fieldValue answer =
-          if answer /= "" then
+          if answer /= "" || question.id == 0 then
             answer
           else
             ""
 
         content' modelContent =
           { modelContent
-              | field = fieldValue question.answer 
+              | field = question.answer --fieldValue question.answer 
               , focusChanged = True
           }
       in
@@ -186,24 +191,40 @@ update msg model =
         -- This is required so that the existing field value doesn't replace
         -- an existing answer with a blank string. This happens when a new
         -- model was loaded from local storage
+        {-
         answer' =
          if model.content.field /= "" then 
             model.content.field 
          else 
             question.answer 
+        -}
+        answer' =
+         if model.content.field == "" && question.answer /= "" then 
+            question.answer 
+         else 
+            model.content.field 
+
+        completed' =
+          if String.isEmpty model.content.field then
+            False
+          else
+            True
+
 
         questions' currentQuestion =
           if currentQuestion.id == question.id then
             { currentQuestion 
-              | answer = answer'
-              , completed = True 
+              | answer = model.content.field --answer'
+              --| answer = answer'
+              , completed = completed' 
             }
           else
             currentQuestion
 
+
         content' modelContent =
           { modelContent
-              | questions = List.map questions' modelContent.questions 
+              | questions = List.map questions' modelContent.questions
           }
 
       in
@@ -212,10 +233,55 @@ update msg model =
         }
       ! []
     
-    {-
     MDL msg ->
       Material.update MDL msg model
-    -}
+
+    CheckForCompletion ->
+      let
+
+        -- Find out which questions remain to be answered
+        remainingAnswers =
+          List.filter (\question -> not question.completed) model.content.questions
+
+        -- Find out what the id numbers of the remaining unanswered questions are
+        remainingAnswerIDs =
+          List.map (\question -> question.id) remainingAnswers
+
+        -- Add 1 to the remaining unanswered question id numbers to that they 
+        -- match the displayed question numbers
+        remainingQuestionNumbers =
+          List.map (\id -> id + 1) remainingAnswerIDs
+
+        remainingQuestionNumbersAsStrings =
+          List.map (\number -> toString number) remainingQuestionNumbers
+
+        percentageComplete =
+          let
+            remaining = 
+              List.length remainingQuestionNumbers |> toFloat
+
+            total =
+              List.length model.content.questions |> toFloat
+
+            completed =
+              total - remaining
+              |> (*) 100
+          in
+           completed / total |> floor
+
+        completionMessage' =
+          "Percentage Complete: "
+          ++ toString percentageComplete
+          ++ "%"
+          ++ ". Please complete the remainig questions: " 
+          ++ String.join ", " remainingQuestionNumbersAsStrings
+
+      in
+      { model 
+          | completionMessage = completionMessage'
+      }
+      ! []
+
 
     NoOp ->
       model 
@@ -257,11 +323,30 @@ view model =
     questionStyle =
       style
       [ "font-size" => "1.2em"
+      , "margin-top" => "-1.4em"
       ]
 
     listItemStyle =
       style
       [ "padding-top" => "4em"
+      ]
+
+    toggleStyle =
+      style
+      [ "background-color" => "red"
+      , "display" => "inline"
+      , "height" => "0px"
+      ]
+
+    checkboxStyle =
+      style
+      [ "margin-left" => "-3em"
+      ]
+
+    completionMessageStyle =
+      style
+      [ "color" => "mediumSeaGreen"
+      , "font-weight" => "bold"
       ]
 
     getMaxLength maxlength =
@@ -276,6 +361,34 @@ view model =
       else
         False
 
+    checkbox state =
+      if state == True then
+        Defaults.imagesLocation ++ "checkboxTrue.png"
+      else
+        Defaults.imagesLocation ++ "checkboxFalse.png"
+  
+    {-
+    questions question =
+      li [ listItemStyle ]
+      [ Markdown.toHtml [ questionStyle ] question.question 
+      , Textfield.render MDL [ question.id ] model.mdl
+        [ Textfield.label "Multiline with 6 rows"
+        , Textfield.floatingLabel
+        , Textfield.textarea
+        , Textfield.rows question.rows 
+        , on "input" (Json.map UpdateFieldOnInput targetValue)
+        , onEnter NoOp (AddAnswer question)
+        , onBlur (AddAnswer question)
+        , onFocus (UpdateFieldOnFocus question)
+        --, class "mdl-textfield__input"
+        , textfieldStyle
+        , maxlength <| getMaxLength question.maxlength
+        , autofocus <| setAutoFocus question
+        ]
+      ]
+    |> Material.Scheme.top
+    -}
+    {-
     questions question =
       li [ listItemStyle ]
       [ Markdown.toHtml [ questionStyle ] question.question 
@@ -305,14 +418,81 @@ view model =
         ]
       ]
     |> Material.Scheme.top
+    -}
+    {-
+    questions question =
+      li [ listItemStyle ]
+      [ div [ toggleStyle ]
+          [
+            Toggles.checkbox MDL [ question.id ] model.mdl
+            [ Toggles.value question.completed
+            , css "color" "red"
+            , css "margin-left" "-3em"
+            ]
+          []
+          ]
+      , Markdown.toHtml [ questionStyle ] question.question 
+      , div [ ]
+        [ textarea 
+          [ on "input" (Json.map UpdateFieldOnInput targetValue)
+          , onEnter NoOp (AddAnswer question)
+          , onBlur (AddAnswer question)
+          , onFocus (UpdateFieldOnFocus question)
+          , class "mdl-textfield__input"
+          , rows question.rows
+          , textfieldStyle
+          , maxlength <| getMaxLength question.maxlength
+          , autofocus <| setAutoFocus question
+          ] 
+          [ text question.answer ]
+        ]
+      ]
+    |> Material.Scheme.top
+    -}
+    questions question =
+      li [ listItemStyle ]
+      [ img [ (src <| checkbox question.completed), checkboxStyle ] []
+      , Markdown.toHtml [ questionStyle ] question.question 
+      , div [ ]
+        [ textarea 
+          [ on "input" (Json.map UpdateFieldOnInput targetValue)
+          , onEnter NoOp (AddAnswer question)
+          , onBlur (AddAnswer question)
+          , onFocus (UpdateFieldOnFocus question)
+          , class "mdl-textfield__input"
+          , rows question.rows
+          , textfieldStyle
+          , maxlength <| getMaxLength question.maxlength
+          , autofocus <| setAutoFocus question
+          ] 
+          [ text question.answer ]
+        ]
+      ]
+ 
 
     answers item =
       div []
       [ p [ ] [ text <| toString(item.id + 1) ++ ". " ++ item.answer ]
       ]
 
+    doneButton =
+       Button.render MDL [0] model.mdl
+        [ Button.onClick CheckForCompletion
+        , Button.ripple
+        , Button.colored
+        , Button.raised
+        , css "background-color" "rgb(0, 127, 163)"
+        , css "float" "right"
+        , css "margin-top" "2em"
+        ]
+        [ text "Done" ]
+
   in
     div []
-     [ ol [] (List.map questions model.content.questions)
+     [ p [] [ text model.content.field ]
+     , ol [] (List.map questions model.content.questions)
+     , doneButton
+     , p [ completionMessageStyle ] [ text model.completionMessage ]
      ]
+     |> Material.Scheme.top
      
