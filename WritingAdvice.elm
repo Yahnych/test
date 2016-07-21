@@ -173,9 +173,8 @@ encodeQuestion model =
     [ ("title", Json.Encode.string model.title)
     , ("instructions", Json.Encode.string model.instructions)
     , ("questions", Json.Encode.list (List.map encodeQuestions model.questions))
-    , ("field", Json.Encode.string model.field)
     , ("numberOfParagraphs", Json.Encode.int model.numberOfParagraphs)
-    , ("focusChanged", Json.Encode.bool model.focusChanged)
+    , ("percentageComplete", Json.Encode.int model.percentageComplete)
     ]
 
 
@@ -217,13 +216,12 @@ decodeQuestionsModel questionsModelJson =
 questionsModelDecoder : Json.Decode.Decoder Questions.Content
 --questionsModelDecoder : Json.Decode.Decoder (Material.Model -> Questions.Model)
 questionsModelDecoder =
-  Json.Decode.object6 Questions.Content
+  Json.Decode.object5 Questions.Content
     ("title" := Json.Decode.string)
     ("instructions" := Json.Decode.string)
     ("questions" := Json.Decode.list questionsDecoder)
-    ("field" := Json.Decode.string)
     ("numberOfParagraphs" := Json.Decode.int)
-    ("focusChanged" := Json.Decode.bool)
+    ("percentageComplete" := Json.Decode.int)
 
 
 questionsDecoder : Json.Decode.Decoder Questions.Question
