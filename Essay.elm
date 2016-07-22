@@ -208,13 +208,13 @@ mdlView model =
       style 
         [ "width" => "100%"
         , "height" => "50px"
-        , "display" => "block"
+        --, "display" => "block"
         , "clear" => "both"
-        -- , "background-color" => "aliceBlue"
+        --, "background-color" => "aliceBlue"
         ]
     in 
 
-    div [ buttonContainerStyle ]
+    div [ buttonContainerStyle, id "buttonContainer" ]
     [ Button.render MDL [0] model.mdl
         [ Button.onClick Download 
         , Button.ripple

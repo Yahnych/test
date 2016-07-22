@@ -21,9 +21,57 @@ require("./scripts/vfs_fonts.js")
 //jQuery
 require("./scripts/jquery-3.0.0.min.js")
 
+//Object.assign polyfill
+if (typeof Object.assign != 'function') {
+  Object.assign = function(target) {
+    'use strict';
+    if (target == null) {
+      throw new TypeError('Cannot convert undefined or null to object');
+    }
+
+    target = Object(target);
+    for (var index = 1; index < arguments.length; index++) {
+      var source = arguments[index];
+      if (source != null) {
+        for (var key in source) {
+          if (Object.prototype.hasOwnProperty.call(source, key)) {
+            target[key] = source[key];
+          }
+        }
+      }
+    }
+    return target;
+  };
+}
+
+//Check for IE
+function msieversion() {
+
+    var ua = window.navigator.userAgent;
+    var msie = ua.indexOf("MSIE ");
+
+    if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./))  // If Internet Explorer, return version number
+    {
+        return parseInt(ua.substring(msie + 5, ua.indexOf(".", msie)));
+    }
+    else  // If another browser, return 0
+    {
+        return 0;
+    }
+
+}
+
 //inject bundled Elm app into div #main
 var Elm = require( './Main' );
 var app = Elm.Main.embed( document.getElementById( 'main' ) );
+
+console.log(document.getElementById('buttonContainer'));
+
+//Hide the Word and PDF buttons on older versions of IE
+if (msieversion() > 0 && msieversion() < 12){
+  console.log(msieversion());
+  document.getElementById("buttonContainer").style.display = "none";
+}
 
 //localStorage.clear();
 

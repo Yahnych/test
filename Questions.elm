@@ -370,9 +370,8 @@ view model =
         True ->
           if model.content.percentageComplete == 100 then
             """
-Your finished work is displayed on the right. Read it through carefully and make any further
-changes that you need to. When you are done, select the PDF button to print or save your work.
-Select the WORD button to change, edit or save your work in Microsoft Word or Open Office.
+You're done! Carefully read through your finished work on the right and make any further
+changes that you need to.
             """
           else
             "Please complete the remaing questions: " ++ String.join ", " remainingQuestionNumbersAsStrings
@@ -409,7 +408,7 @@ Select the WORD button to change, edit or save your work in Microsoft Word or Op
       ]
 
     doneButton =
-       Button.render MDL [5] model.mdl
+       Button.render MDL [0] model.mdl
         [ Button.ripple
         , Button.raised
         , Button.colored
