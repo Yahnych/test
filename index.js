@@ -44,6 +44,12 @@ if (typeof Object.assign != 'function') {
   };
 }
 
+
+
+//inject bundled Elm app into div #main
+var Elm = require( './Main' );
+var app = Elm.Main.embed( document.getElementById( 'main' ) );
+
 //Check for IE
 function msieversion() {
 
@@ -61,17 +67,19 @@ function msieversion() {
 
 }
 
-//inject bundled Elm app into div #main
-var Elm = require( './Main' );
-var app = Elm.Main.embed( document.getElementById( 'main' ) );
-
-console.log(document.getElementById('buttonContainer'));
+app.ports.checkIeVersion.subscribe(function(initial){
+  var version = msieversion();
+  console.log(initial);
+  setTimeout(function(){app.ports.ieVersion.send(version);},0);
+});
 
 //Hide the Word and PDF buttons on older versions of IE
+/*
 if (msieversion() > 0 && msieversion() < 12){
   console.log(msieversion());
   document.getElementById("buttonContainer").style.display = "none";
 }
+*/
 
 //localStorage.clear();
 
@@ -79,16 +87,16 @@ if (msieversion() > 0 && msieversion() < 12){
 //Save the data
 app.ports.save.subscribe(function(data){
 	localStorage.setItem("data", JSON.stringify(data));
-	console.log("*** Saving data...")
-	console.log(JSON.stringify(data))
+	//console.log("*** Saving data...")
+	//console.log(JSON.stringify(data))
 });
 
 //Load the data
 var savedData = localStorage.getItem("data");
 window.setTimeout(function(){
 	app.ports.load.send(JSON.parse(savedData));
-	console.log("*** Loaded data")
-	console.log(savedData)
+	//console.log("*** Loaded data")
+	//console.log(savedData)
 });
 
 //Download file
@@ -96,7 +104,7 @@ app.ports.download.subscribe(function(elmData) {
 	var filename = elmData[0];
 	var data = elmData[1];
 	var htmlData = toWord(marked(data));
-	console.log(htmlData)
+	//console.log(htmlData)
 	download(filename, htmlData);
   
 });

@@ -22,6 +22,7 @@ type alias Model =
   { questions : Questions.Model
   , essay : Essay.Model
   , header : Header.Model
+  , ieVersionNumber : Int
   }
 
 
@@ -29,14 +30,17 @@ init : (Model, Cmd Msg)
 init =
   let 
     questions' =
-      Questions.init 
-  in
-  { questions = questions'
-  , essay = Essay.init questions'.content ""
-  , header = Header.init
-  }
-  ![]
+      Questions.init
 
+    model' = 
+      { questions = questions'
+      , essay = Essay.init questions'.content ""
+      , header = Header.init
+      , ieVersionNumber = 0
+      }
+  in
+    model' ! [ checkIeVersion model'.ieVersionNumber ]
+    
 
 -- UPDATE
 
@@ -47,6 +51,7 @@ type Msg
   | UpdateMarkdown --Questions.Model
   -- | LoadSavedData String
   | SetQuestions Questions.Content
+  | CheckIE Int
   | NoOp
 
 
@@ -55,10 +60,28 @@ type Msg
 -- port save : Questions.Model -> Cmd msg
 port save : Json.Encode.Value -> Cmd msg
 
+-- A port to capture the version of IE
+port checkIeVersion : Int -> Cmd msg
+
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update message model =
   case message of
+    CheckIE versionNumber ->
+      let
+        essay = model.essay
+        essay' =
+          { essay
+             | ieVersionNumber = versionNumber
+          }
+
+      in
+      { model 
+          | ieVersionNumber = versionNumber
+          , essay = essay'
+      }
+      ! []
+
     UpdateQuestions msg ->
       let
         (questions', questionsFx) 
@@ -114,30 +137,6 @@ update message model =
     SetQuestions questionsContent ->
       let
         
-        {- 
-        firstQuestion =
-          List.head questionsContent.questions 
-          |> Maybe.withDefault 
-            { question = ""
-            , answer = "This is a test"
-            , completed = False
-            , editing = False
-            , id = 0
-            , paragraphId = 0
-            , rows = 0
-            , maxlength = 0
-            , format = Format.Normal
-            }
-
-        firstAnswer =
-          firstQuestion.answer
-
-        content' =
-          { questionsContent
-              | field = firstAnswer
-          }
-        -}
-
         questionsModel' currentQuestionsModel =
           { currentQuestionsModel
               | content = questionsContent  --content'
@@ -280,10 +279,15 @@ sendToStorage model =
 --port load : (String -> msg) -> Sub msg
 port load : (Json.Decode.Value -> msg) -> Sub msg
 
+--Capture the incoming IE version number
+port ieVersion : (Int -> msg) -> Sub msg
+
 subscriptions : Model -> Sub Msg
 subscriptions model = 
-  --load LoadSavedData
-  load loadFromStorage
+  Sub.batch
+    [ ieVersion CheckIE 
+    , load loadFromStorage
+    ]
 
 
 -- VIEW
@@ -307,6 +311,7 @@ view model =
       , "overflow" => "hidden"
       , "overflow-y" => "auto"
       , "overflow-x" => "auto"
+      , "position" => "relative"
       --, "background-color" => "aliceBlue" 
       ]
     essayContainerStyle =
