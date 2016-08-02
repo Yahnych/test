@@ -20,6 +20,7 @@ import Material.Options exposing (css)
 type alias Model = 
   { markdown : String
   , questions : Questions.Content
+  , ieVersionNumber : Int
   , mdl : Material.Model
   } 
 
@@ -28,6 +29,7 @@ init : Questions.Content -> String -> Model
 init questions' markdown' = 
   { markdown = markdown'
   , questions = questions'
+  , ieVersionNumber = 0
   , mdl = Material.model
   } 
 
@@ -205,16 +207,22 @@ view model =
 mdlView model =
     let
     buttonContainerStyle =
-      style 
-        [ "width" => "100%"
-        , "height" => "50px"
-        --, "display" => "block"
-        , "clear" => "both"
-        --, "background-color" => "aliceBlue"
-        ]
+      if model.ieVersionNumber == 0 || model.ieVersionNumber > 11 then
+        style 
+          [ "width" => "100%"
+          , "height" => "50px"
+          --, "display" => "block"
+          , "clear" => "both"
+          --, "background-color" => "aliceBlue"
+          ]
+      else
+        style 
+          [ "display" => "none" 
+          ]
+
     in 
 
-    div [ buttonContainerStyle, id "buttonContainer" ]
+    div [ buttonContainerStyle ]
     [ Button.render MDL [0] model.mdl
         [ Button.onClick Download 
         , Button.ripple

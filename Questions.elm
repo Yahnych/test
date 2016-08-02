@@ -322,7 +322,7 @@ view model =
       style
       [ "color" => "mediumSeaGreen"
       , "font-weight" => "bold"
-      , "width" => "75%"
+      , "width" => "80%"
       ]
 
     completionMessageContainerStyle =
@@ -371,10 +371,10 @@ view model =
           if model.content.percentageComplete == 100 then
             """
 You're done! Carefully read through your finished work on the right and make any further
-changes that you need to.
+changes that you need to by updating your answers above.
             """
           else
-            "Please complete the remaing questions: " ++ String.join ", " remainingQuestionNumbersAsStrings
+            "Please complete the remaining questions: " ++ String.join ", " remainingQuestionNumbersAsStrings
 
         False ->
           ""
