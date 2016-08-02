@@ -1,5 +1,4 @@
 //pull in desired CSS,SASS file
-require( './styles/main.scss' );
 
 //Mdl
 require( './mdl/material.min.css' );
