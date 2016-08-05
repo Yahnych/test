@@ -6,7 +6,7 @@ import Html.Events exposing (..)
 import Json.Decode as Json
 import Data exposing (..)
 import Format exposing (..)
-import Markdown
+import Markdown exposing (..)
 import Defaults
 import String
 
@@ -32,6 +32,7 @@ type alias Content =
   , questions : List Question
   , numberOfParagraphs : Int
   , percentageComplete : Int
+  , completionMessage : String
   }
 
 init : Model
@@ -79,6 +80,7 @@ init =
       , questions = List.indexedMap createQuestion Data.questions
       , numberOfParagraphs = numberOfParagraphs'
       , percentageComplete = 0
+      , completionMessage = Data.completionMessage
       } 
 
     model' = 
@@ -299,6 +301,7 @@ view model =
       style
       [ "font-size" => "1.2em"
       , "margin-top" => "-1.4em"
+      , "padding-bottom" => "1.5em"
       ]
 
     listItemStyle =
@@ -316,9 +319,20 @@ view model =
     checkboxStyle =
       style
       [ "margin-left" => "-3em"
+      , "margin-top" => "-2px"
       ]
 
     completionMessageStyle =
+      if model.content.percentageComplete == 100 then
+        style
+        [ "color" => "black"
+        , "font-weight" => "normal"
+        , "width" => "80%"
+        ]
+      else
+        completionPercentageMessageStyle
+
+    completionPercentageMessageStyle =
       style
       [ "color" => "mediumSeaGreen"
       , "font-weight" => "bold"
@@ -369,12 +383,12 @@ view model =
       case model.displayCompletionMessage of
         True ->
           if model.content.percentageComplete == 100 then
-            """
-You're done! Carefully read through your finished work on the right and make any further
-changes that you need to by updating your answers above.
-            """
+            model.content.completionMessage
           else
-            "Please complete the remaining questions: " ++ String.join ", " remainingQuestionNumbersAsStrings
+            "**" 
+            ++ "Please complete the remaining questions: " 
+            ++ (String.join ", " remainingQuestionNumbersAsStrings)
+            ++ "**"
 
         False ->
           ""
@@ -419,13 +433,23 @@ changes that you need to by updating your answers above.
         ]
         [ text "Done" ]
 
+    options =
+      let
+        defaultOptions = Markdown.defaultOptions
+      in
+      { defaultOptions 
+          | smartypants = True
+          , sanitize = True
+      }
+
+
   in
     div []
      [ ol [] (List.map questions model.content.questions)
      , doneButton
      , div [ completionMessageContainerStyle ]
-       [ p [ completionMessageStyle ] [ text percentageCompleteMessage ]
-       , p [ completionMessageStyle ] [ text completionMessage ]
+       [ p [ completionPercentageMessageStyle ] [ text percentageCompleteMessage ]
+       , Markdown.toHtml [ completionMessageStyle ] completionMessage
        ]
      ]
      --|> Material.Scheme.top

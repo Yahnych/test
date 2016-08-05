@@ -9,7 +9,6 @@ import Markdown
 import Defaults
 
 import Material
-import Material.Scheme
 import Material.Button as Button
 import Material.Tooltip as Tooltip
 import Material.Options exposing (css)
@@ -69,7 +68,6 @@ update message model =
           Defaults.projectTitle ++ ".doc"
       in
       model ! [ download (fileName, model.markdown) ]
-      --model ! []
 
     UpdateMarkdown questions ->
       { model | markdown = createMarkdown questions }
@@ -89,7 +87,13 @@ update message model =
 -- Find only the questions that have been answered
 answeredQuestions : Questions.Content -> List Questions.Question
 answeredQuestions model =
-  List.filter (\question -> not (String.isEmpty question.answer)) model.questions
+  --List.filter (\question -> not (String.isEmpty question.answer)) model.questions
+  List.filter (\question -> not (String.isEmpty question.answer)) (questionsWithoutTitle model)
+
+
+questionsWithoutTitle : Questions.Content -> List Questions.Question
+questionsWithoutTitle model =
+  List.filter (\question -> question.format /= Format.Title ) model.questions
 
 
 -- Display only the answered questions that belong to this paragraph. This is determined
@@ -98,6 +102,36 @@ sentencesBelongingToParagraph : Questions.Content -> Int -> List Questions.Quest
 sentencesBelongingToParagraph model paragraphId =
   List.filter (\question -> question.paragraphId == paragraphId) (answeredQuestions model)
 
+
+firstQuestion : Questions.Content -> Questions.Question
+firstQuestion content =
+  List.head content.questions 
+  |> Maybe.withDefault 
+    { question = ""
+    , answer = "This is a test"
+    , completed = False
+    , editing = False
+    , id = 0
+    , paragraphId = 0
+    , rows = 0
+    , maxlength = 0
+    , format = Format.Normal
+    }
+
+
+firstAnswer : Questions.Content -> String
+firstAnswer content =
+  .answer (firstQuestion content)
+
+
+firstAnswerCompleted : Questions.Content -> Bool
+firstAnswerCompleted content = 
+  .completed <| firstQuestion content
+
+
+firstAnswerIsTitle : Questions.Content -> Bool
+firstAnswerIsTitle content =
+  (.format <| firstQuestion content) == Format.Title
 
 -- FORMATTING
 -- The specific way in which this essay should be formatted
@@ -117,7 +151,7 @@ format question =
 
 -- Generates the markdown file based on the currently answered questions
 createMarkdown : Questions.Content -> String
-createMarkdown model =
+createMarkdown content =
   let 
     paragraphBreak =
   """ 
@@ -125,18 +159,29 @@ createMarkdown model =
   """
 
     indent = "&ensp;&ensp;&ensp;&ensp;&ensp;"
+  
+    {-
+    firstAnswerCompleted = 
+      .completed <| firstQuestion content
+
+    firstAnswerIsTitle =
+      (.format <| firstQuestion content) == Format.Title
+    -}
 
     title =
-      "# " ++ model.title ++ paragraphBreak
+      if (firstAnswerCompleted content) && (firstAnswerIsTitle content)  then
+        "# " ++ (Format.formatTitle (firstAnswer content)) ++ paragraphBreak
+      else
+        "# " ++ content.title ++ paragraphBreak
 
     essayContent =
-      List.map paragraphFormat [0 .. model.numberOfParagraphs ]
+      List.map paragraphFormat [0 .. content.numberOfParagraphs ]
       |> String.concat
 
     paragraphFormat paragraphId =
       let
         completeParagraph =
-          List.map sentenceFormat <| sentencesBelongingToParagraph model paragraphId
+          List.map sentenceFormat <| sentencesBelongingToParagraph content paragraphId
 
         firstSentence =
           List.head completeParagraph 
@@ -157,7 +202,7 @@ createMarkdown model =
   
       -- Create the paragraph by mapping the sentences that belong to the 
       -- current paragraph
-      -- List.map sentenceFormat (sentencesBelongingToParagraph model paragraphId)
+      -- List.map sentenceFormat (sentencesBelongingToParagraph content paragraphId)
       -- |> String.concat
       -- |> (++) paragraphBreak
 
@@ -261,8 +306,16 @@ titleView model =
       , "text-align" => "center"
       , "padding-bottom" => "1em"
       ]
+
+    -- Display the first answer as the title if it's been completed and its format style is Title.
+    -- Otherwise, display the title of the project
+    title =
+      if (firstAnswerCompleted model.questions) && (firstAnswerIsTitle model.questions) then
+        h1 [ titleStyle ] [ text <| Format.formatTitle (firstAnswer model.questions) ]
+      else
+        h1 [ titleStyle ] [ text model.questions.title ]
   in
-    h1 [ titleStyle ] [ text model.questions.title ]
+    title
 
 -- The paragraph view
 paragraphView : Model -> Int -> Html Msg
@@ -272,6 +325,7 @@ paragraphView model paragraphId =
     -- Create the paragraph by mapping the sentences that belong to the 
     -- current paragraph
     paragraph =
+      --(List.map sentenceView (sentencesBelongingToParagraph model.questions paragraphId))
       (List.map sentenceView (sentencesBelongingToParagraph model.questions paragraphId))
 
     paragraphStyle =

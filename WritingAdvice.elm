@@ -136,7 +136,6 @@ update message model =
 
     SetQuestions questionsContent ->
       let
-        
         questionsModel' currentQuestionsModel =
           { currentQuestionsModel
               | content = questionsContent  --content'
@@ -174,6 +173,7 @@ encodeQuestion model =
     , ("questions", Json.Encode.list (List.map encodeQuestions model.questions))
     , ("numberOfParagraphs", Json.Encode.int model.numberOfParagraphs)
     , ("percentageComplete", Json.Encode.int model.percentageComplete)
+    , ("completionMessage", Json.Encode.string model.completionMessage)
     ]
 
 
@@ -203,6 +203,8 @@ encodeFormatStyle formatStyle =
     Format.AuthorOfQuotation ->
       Json.Encode.string "AuthorOfQuotation"
 
+    Format.Title ->
+      Json.Encode.string "Title"
 
 -- Decoding
 
@@ -210,17 +212,17 @@ decodeQuestionsModel : Json.Decode.Value -> Result String Questions.Content
 decodeQuestionsModel questionsModelJson =
   Json.Decode.decodeValue questionsModelDecoder questionsModelJson
 
-
  
 questionsModelDecoder : Json.Decode.Decoder Questions.Content
 --questionsModelDecoder : Json.Decode.Decoder (Material.Model -> Questions.Model)
 questionsModelDecoder =
-  Json.Decode.object5 Questions.Content
+  Json.Decode.object6 Questions.Content
     ("title" := Json.Decode.string)
     ("instructions" := Json.Decode.string)
     ("questions" := Json.Decode.list questionsDecoder)
     ("numberOfParagraphs" := Json.Decode.int)
     ("percentageComplete" := Json.Decode.int)
+    ("completionMessage" := Json.Decode.string)
 
 
 questionsDecoder : Json.Decode.Decoder Questions.Question
@@ -251,6 +253,9 @@ formatStyleDecoder =
         "AuthorOfQuotation" ->
           Result.Ok Format.AuthorOfQuotation
 
+        "Title" ->
+          Result.Ok Format.Title
+
         _ -> Result.Err ("Not a valid FormatStyle: " ++ string)  
   in
     Json.Decode.customDecoder Json.Decode.string decodeToFormatStyle
@@ -266,7 +271,7 @@ loadFromStorage questionsModelJson =
       SetQuestions model
       --SetQuestions model.questions.content
 
-    _ -> 
+    _ ->
       NoOp
 
 
@@ -312,7 +317,6 @@ view model =
       , "overflow-y" => "auto"
       , "overflow-x" => "auto"
       , "position" => "relative"
-      --, "background-color" => "aliceBlue" 
       ]
     essayContainerStyle =
       style
@@ -333,6 +337,11 @@ view model =
       , "padding-top" => "0.5em"
       ]
 
+    spacerStyle =
+      style
+      [ "height" => "6em"
+      ]
+
 
   in 
   div [ Html.Attributes.class "mdl-grid", mainContainerStyle ]
@@ -341,6 +350,10 @@ view model =
        [ App.map UpdateHeader (Header.view model.header)
        , h1 [ titleStyle ] [ text model.questions.content.title ]
        , App.map UpdateQuestions (Questions.view model.questions)
+
+       -- This spacer div is an unfortunate cross-platform hack to add default
+       -- padding at the bottom of the questions box 
+       , div [ spacerStyle ] []
        ]
     , div 
        [ Html.Attributes.class "mdl-cell mdl-cell--6-col", essayContainerStyle ] 

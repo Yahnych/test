@@ -80,9 +80,11 @@ if (msieversion() > 0 && msieversion() < 12){
 }
 */
 
-//localStorage.clear();
 
 //Local storage
+
+//localStorage.clear();
+
 //Save the data
 app.ports.save.subscribe(function(data){
 	localStorage.setItem("data", JSON.stringify(data));
@@ -96,7 +98,7 @@ window.setTimeout(function(){
 	app.ports.load.send(JSON.parse(savedData));
 	//console.log("*** Loaded data")
 	//console.log(savedData)
-});
+}, 0);
 
 //Download file
 app.ports.download.subscribe(function(elmData) {

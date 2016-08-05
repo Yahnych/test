@@ -17,13 +17,36 @@ type alias Question =
 
 
 title : String
-title = "Authors' Advice to Writers"
+title = "Opinion Paragraph"
 
 
 instructions : String
 instructions = 
   """
-Answer the questions on the left to build your essay.
+Answer the questions on the left to build your paragraph.
+  """
+
+completionMessage : String
+completionMessage =
+  """
+Now that you’ve written your draft, review and revise your paragraph using the following questions and steps. (You can make changes to your paragraph by updating your answers above.):  
+
+1. Read the paragraph out loud. This can help you pick up on anything that sounds repetitive, awkward, or choppy.
+
+2. Ask yourself the following questions about the content and flow:
+  * What should I add?
+  * What should I take out? 
+  * What should I move?
+  * Is the paragraph clear and easy to follow?
+  * Are there transitions between ideas? (e.g., Have I used words such as "Firstly," "Secondly," "Thirdly," "Finally," "Thus," "Therefore," and so on?)  
+
+3. Ask yourself the following questions about the style and format:
+  - Is the first line of the paragraph indented?
+  - Is the paragraph complete (correctly structured)? 
+  - Are all of the sentences complete?
+  - Does each sentence begin with a capital letter?    
+  - Does each sentence end with a punctuation mark?
+  - Is each sentence free of spelling and grammatical errors?
   """
 
 questions : List Question
@@ -31,93 +54,51 @@ questions =
   [ 
     { question = 
         """
-Find a quotation from one of the authors in this lesson 
-that you think is particularly good advice for writers. This can be any quotation from 
-**Umberto Eco**, **Susan Sontag**, **Stephen King** and/or **Guy Gavriel Kay**, 
-of up to 200 words. Copy the quotation directly into the following text field:
-        """
-    , paragraphId = 0
-    , rows = 7
-    , maxlength = 700
-    , format = Format.Quotation
-    }
-  ,
-    { question = 
-        """
-Who wrote the quotation that you listed above?
+What is the title of your paragraph?
         """
     , paragraphId = 0
     , rows = 1
-    , maxlength = 0
-    , format = Format.AuthorOfQuotation
+    , maxlength = 500
+    , format = Format.Title
     }
   ,
     { question = 
         """
-Choose a short excerpt from one of your favourite authors that you feel is a good piece 
-of writing, and seems to follow the author’s advice that you listed in step 1. 
-Copy the excerpt into the following text field (maximum 200 words):
+Topic sentence:
         """
-    , paragraphId = 1
-    , rows = 7
-    , maxlength = 700
-    , format = Format.Quotation
-    }
-  ,
-    { question = 
-        """
-Who wrote the quotation that you listed above?
-        """
-    , paragraphId = 1
-    , rows = 1
-    , maxlength = 0
-    , format = Format.AuthorOfQuotation
-    }
-  ,
-    { question = 
-        """
-Why do you feel the excerpt that you chose is an effective piece of writing?
-(For example: what do you like about it, how does it make you feel, or does it express
-important ideas?)
-        """
-    , paragraphId = 2
-    , rows = 7
-    , maxlength = 0
+    , paragraphId = 0
+    , rows = 3
+    , maxlength = 500
     , format = Format.Normal
     }
   ,
     { question = 
         """
-Explain how the writing excerpt you chose follows the advice of the author that you selected.
-Make sure to prove that what you are saying is true by including direct quotations both from the 
-writing excerpt and the author’s advice that you chose.
+First supporting point with facts, examples, and/or evidence:
         """
-    , paragraphId = 2
-    , rows = 7
-    , maxlength = 0
+    , paragraphId = 0
+    , rows = 3
+    , maxlength = 500
     , format = Format.Normal
     }
   ,
     { question = 
         """
-Choose one more example from the writing excerpt you chose and explain how it 
-follows the author’s advice. Again, make sure to include direct quotations that
-prove your point.
+Second supporting point with facts, examples, and/or evidence:
         """
-    , paragraphId = 3
-    , rows = 7
-    , maxlength = 0
+    , paragraphId = 0
+    , rows = 3
+    , maxlength = 500
     , format = Format.Normal
     }
   ,
     { question = 
         """
-What general benefit do you feel the author’s advice had on the overall 
-quality of the writing excerpt you chose?         
+Third supporting point with facts, examples, and/or evidence:
         """
-    , paragraphId = 3
-    , rows = 7
-    , maxlength = 0
+    , paragraphId = 0
+    , rows = 3
+    , maxlength = 500
     , format = Format.Normal
     }
   ]
