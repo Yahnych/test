@@ -36,7 +36,7 @@ init questions' markdown' =
 -- UPDATE
 
 type Msg 
-  = MDL Material.Msg
+  = MDL (Material.Msg Msg)
   | Download
   | Pdf
   | UpdateMarkdown Questions.Content
@@ -52,8 +52,8 @@ port pdf : (String, String) -> Cmd msg
 update: Msg -> Model -> (Model, Cmd Msg)
 update message model = 
   case message of 
-    MDL msg ->
-      Material.update MDL msg model
+    MDL msg' ->
+      Material.update msg' model
 
     Pdf ->
       let
