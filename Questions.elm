@@ -130,7 +130,7 @@ type alias Essay =
 
 type Msg
   = UpdateField Question String
-  | MDL Material.Msg
+  | MDL (Material.Msg Msg)
   | CheckForCompletion
   | UpdatePercentageComplete
   | NoOp
@@ -140,8 +140,8 @@ update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
     
-    MDL msg ->
-      Material.update MDL msg model
+    MDL msg' ->
+      Material.update msg' model
 
     CheckForCompletion ->
       let

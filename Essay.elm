@@ -36,7 +36,7 @@ init questions' markdown' =
 -- UPDATE
 
 type Msg 
-  = MDL Material.Msg
+  = MDL (Material.Msg Msg)
   | Download
   | Pdf
   | UpdateMarkdown Questions.Content
@@ -52,8 +52,8 @@ port pdf : (String, String) -> Cmd msg
 update: Msg -> Model -> (Model, Cmd Msg)
 update message model = 
   case message of 
-    MDL msg ->
-      Material.update MDL msg model
+    MDL msg' ->
+      Material.update msg' model
 
     Pdf ->
       let
@@ -91,6 +91,8 @@ answeredQuestions model =
   List.filter (\question -> not (String.isEmpty question.answer)) (questionsWithoutTitle model)
 
 
+-- Don't include any questions that have their `Format` set to `Title`. `Title` questions should just be
+-- used for the title of the essay or project
 questionsWithoutTitle : Questions.Content -> List Questions.Question
 questionsWithoutTitle model =
   List.filter (\question -> question.format /= Format.Title ) model.questions
@@ -193,9 +195,20 @@ createMarkdown content =
           |> Maybe.withDefault [""]
           |> String.concat
 
+        currentQuestion =  
+          List.filter (\question -> paragraphId == question.id) (answeredQuestions content)
+          |> List.head
+          |> Maybe.withDefault (firstQuestion content) 
+
+        question =
+          currentQuestion.question
+
+        formattedQuestion =
+          "**" ++ (toString <| paragraphId + 1) ++ ". " ++ question ++ "**"
+
       in
       if List.length completeParagraph /= 0 then 
-        firstSentence ++ restOfParagraph ++ paragraphBreak
+        paragraphBreak ++ formattedQuestion ++ paragraphBreak ++ firstSentence ++ restOfParagraph ++ "<br><br><br>"
       else 
         ""
 
@@ -234,7 +247,9 @@ view model =
     -- Otherwise, display the instruction text
     essayContent =
       if List.length (answeredQuestions model.questions) /= 0 then
-        div [] (List.map (paragraphView model) [0 .. model.questions.numberOfParagraphs])
+        --div [] (List.map (paragraphView model) [0 .. model.questions.numberOfParagraphs])
+        ol [] (List.map (shortAnswerView model) [0 .. model.questions.numberOfParagraphs])
+        --div [] (List.map (shortAnswerView model) [0 .. (List.length <| answeredQuestions model.questions) - 2])
       else
         div [ instructionStyle ] [ text <| "(" ++ model.questions.instructions ++ ")"  ]
   in
@@ -316,6 +331,60 @@ titleView model =
         h1 [ titleStyle ] [ text model.questions.title ]
   in
     title
+
+
+-- The short answer view
+shortAnswerView : Model -> Int -> Html Msg
+shortAnswerView model paragraphId =
+  let
+  
+    -- Create the paragraph by mapping the sentences that belong to the 
+    -- current paragraph
+    answer =
+      --(List.map sentenceView (sentencesBelongingToParagraph model.questions paragraphId))
+      (List.map sentenceView (sentencesBelongingToParagraph model.questions paragraphId))
+
+    currentQuestion =  
+      List.filter (\question -> paragraphId == question.id) (answeredQuestions model.questions)
+      |> List.head
+      |> Maybe.withDefault (firstQuestion model.questions) 
+
+    question =
+      currentQuestion.question
+
+    answerStyle =
+      style 
+      [ "text-indent" => "3em"
+      , "line-height" =>  "2em" 
+      , "font-size" => "1em"
+      , "font-family" => Defaults.essayFont
+      , "padding-top" => "1em"
+      ]
+
+    questionStyle =
+      style
+      [ "font-weight" => "bold"
+      ]
+
+    --Only display the short answer if the question has been completed and
+    -- the `paragraphId` matched the `currentQuestion.id`
+    shortAnswerContainerStyle =
+      if currentQuestion.completed == True && paragraphId == currentQuestion.id then
+        style
+        [ "display" => "block"
+        , "padding-bottom" => "3.5em"
+        ]
+      else
+        style
+        [ "display" => "none"
+        ]
+
+  in
+  li [ shortAnswerContainerStyle ]
+  [ p [ questionStyle ] [ text (toString(paragraphId + 1) ++ ". " ++ question) ]
+  , p [ answerStyle ] answer
+  ]
+
 
 -- The paragraph view
 paragraphView : Model -> Int -> Html Msg

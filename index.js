@@ -3,11 +3,12 @@
 //Mdl
 require( './mdl/material.min.css' );
 require( './mdl/material.min.js' );
-require( 'material-design-lite/material.css' );
-require( 'material-design-lite/material.js' );
+//require( 'material-design-lite/material.css' );
+//require( 'material-design-lite/material.js' );
 
 //Marked
-var marked = require("marked");
+//var marked = require("marked");
+var marked = require("./scripts/marked.min.js");
 
 //jsPDF
 //require("jspdf");
