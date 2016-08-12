@@ -1,0 +1,5 @@
+var _moarwick$elm_webpack_starter$Defaults$projectTitle = 'Author\'s Advice to Writers';
+var _moarwick$elm_webpack_starter$Defaults$essayFont = 'LibreBaskerville-Regular, serif';
+var _moarwick$elm_webpack_starter$Defaults$titleFont = 'SuisseIntl-Thin';
+var _moarwick$elm_webpack_starter$Defaults$fontFamily = 'Helvetica, Arial, sans-serif';
+var _moarwick$elm_webpack_starter$Defaults$imagesLocation = 'images/';

@@ -1,0 +1,420 @@
+var _moarwick$elm_webpack_starter$Essay_ops = _moarwick$elm_webpack_starter$Essay_ops || {};
+_moarwick$elm_webpack_starter$Essay_ops['=>'] = F2(
+	function (v0, v1) {
+		return {ctor: '_Tuple2', _0: v0, _1: v1};
+	});
+var _moarwick$elm_webpack_starter$Essay$format = function (question) {
+	return _moarwick$elm_webpack_starter$Format$addSpaceBetweenSentences(
+		A2(
+			_moarwick$elm_webpack_starter$Format$formatAuthorOfQuotation,
+			question.format,
+			A2(
+				_moarwick$elm_webpack_starter$Format$addPossibleQuotes,
+				question.format,
+				_moarwick$elm_webpack_starter$Format$capitalizeFirstCharacter(
+					_moarwick$elm_webpack_starter$Format$removeSpaceBeforePeriod(
+						_moarwick$elm_webpack_starter$Format$addFinalPeriod(
+							_moarwick$elm_webpack_starter$Format$trimExtraWhitespace(question.answer)))))));
+};
+var _moarwick$elm_webpack_starter$Essay$sentenceView = function (question) {
+	var sentenceStyle = function () {
+		var _p0 = question.format;
+		switch (_p0.ctor) {
+			case 'Quotation':
+				return _elm_lang$html$Html_Attributes$style(
+					_elm_lang$core$Native_List.fromArray(
+						[
+							A2(_moarwick$elm_webpack_starter$Essay_ops['=>'], 'font-style', 'italic'),
+							A2(_moarwick$elm_webpack_starter$Essay_ops['=>'], 'display', 'block'),
+							A2(_moarwick$elm_webpack_starter$Essay_ops['=>'], 'padding-left', '5em'),
+							A2(_moarwick$elm_webpack_starter$Essay_ops['=>'], 'padding-right', '5em'),
+							A2(_moarwick$elm_webpack_starter$Essay_ops['=>'], 'padding-bottom', '1em')
+						]));
+			case 'AuthorOfQuotation':
+				return _elm_lang$html$Html_Attributes$style(
+					_elm_lang$core$Native_List.fromArray(
+						[
+							A2(_moarwick$elm_webpack_starter$Essay_ops['=>'], 'display', 'block'),
+							A2(_moarwick$elm_webpack_starter$Essay_ops['=>'], 'text-align', 'right'),
+							A2(_moarwick$elm_webpack_starter$Essay_ops['=>'], 'padding-right', '5em'),
+							A2(_moarwick$elm_webpack_starter$Essay_ops['=>'], 'padding-bottom', '1em'),
+							A2(_moarwick$elm_webpack_starter$Essay_ops['=>'], 'font-style', 'italic')
+						]));
+			default:
+				return _elm_lang$html$Html_Attributes$style(
+					_elm_lang$core$Native_List.fromArray(
+						[
+							A2(_moarwick$elm_webpack_starter$Essay_ops['=>'], 'font-style', 'normal'),
+							A2(_moarwick$elm_webpack_starter$Essay_ops['=>'], 'display', 'inline')
+						]));
+		}
+	}();
+	return A2(
+		_evancz$elm_markdown$Markdown$toHtml,
+		_elm_lang$core$Native_List.fromArray(
+			[
+				sentenceStyle,
+				_elm_lang$html$Html_Attributes$class('formattedSentence')
+			]),
+		_moarwick$elm_webpack_starter$Essay$format(question));
+};
+var _moarwick$elm_webpack_starter$Essay$firstQuestion = function (content) {
+	return A2(
+		_elm_lang$core$Maybe$withDefault,
+		{question: '', answer: 'This is a test', completed: false, editing: false, id: 0, paragraphId: 0, rows: 0, maxlength: 0, format: _moarwick$elm_webpack_starter$Format$Normal},
+		_elm_lang$core$List$head(content.questions));
+};
+var _moarwick$elm_webpack_starter$Essay$firstAnswer = function (content) {
+	return function (_) {
+		return _.answer;
+	}(
+		_moarwick$elm_webpack_starter$Essay$firstQuestion(content));
+};
+var _moarwick$elm_webpack_starter$Essay$firstAnswerCompleted = function (content) {
+	return function (_) {
+		return _.completed;
+	}(
+		_moarwick$elm_webpack_starter$Essay$firstQuestion(content));
+};
+var _moarwick$elm_webpack_starter$Essay$firstAnswerIsTitle = function (content) {
+	return _elm_lang$core$Native_Utils.eq(
+		function (_) {
+			return _.format;
+		}(
+			_moarwick$elm_webpack_starter$Essay$firstQuestion(content)),
+		_moarwick$elm_webpack_starter$Format$Title);
+};
+var _moarwick$elm_webpack_starter$Essay$titleView = function (model) {
+	var titleStyle = _elm_lang$html$Html_Attributes$style(
+		_elm_lang$core$Native_List.fromArray(
+			[
+				A2(_moarwick$elm_webpack_starter$Essay_ops['=>'], 'font-size', '1.5em'),
+				A2(_moarwick$elm_webpack_starter$Essay_ops['=>'], 'font-family', 'LibreBaskerville-Regular, serif'),
+				A2(_moarwick$elm_webpack_starter$Essay_ops['=>'], 'text-align', 'center'),
+				A2(_moarwick$elm_webpack_starter$Essay_ops['=>'], 'padding-bottom', '1em')
+			]));
+	var title = (_moarwick$elm_webpack_starter$Essay$firstAnswerCompleted(model.questions) && _moarwick$elm_webpack_starter$Essay$firstAnswerIsTitle(model.questions)) ? A2(
+		_elm_lang$html$Html$h1,
+		_elm_lang$core$Native_List.fromArray(
+			[titleStyle]),
+		_elm_lang$core$Native_List.fromArray(
+			[
+				_elm_lang$html$Html$text(
+				_moarwick$elm_webpack_starter$Format$formatTitle(
+					_moarwick$elm_webpack_starter$Essay$firstAnswer(model.questions)))
+			])) : A2(
+		_elm_lang$html$Html$h1,
+		_elm_lang$core$Native_List.fromArray(
+			[titleStyle]),
+		_elm_lang$core$Native_List.fromArray(
+			[
+				_elm_lang$html$Html$text(model.questions.title)
+			]));
+	return title;
+};
+var _moarwick$elm_webpack_starter$Essay$questionsWithoutTitle = function (model) {
+	return A2(
+		_elm_lang$core$List$filter,
+		function (question) {
+			return !_elm_lang$core$Native_Utils.eq(question.format, _moarwick$elm_webpack_starter$Format$Title);
+		},
+		model.questions);
+};
+var _moarwick$elm_webpack_starter$Essay$answeredQuestions = function (model) {
+	return A2(
+		_elm_lang$core$List$filter,
+		function (question) {
+			return _elm_lang$core$Basics$not(
+				_elm_lang$core$String$isEmpty(question.answer));
+		},
+		_moarwick$elm_webpack_starter$Essay$questionsWithoutTitle(model));
+};
+var _moarwick$elm_webpack_starter$Essay$sentencesBelongingToParagraph = F2(
+	function (model, paragraphId) {
+		return A2(
+			_elm_lang$core$List$filter,
+			function (question) {
+				return _elm_lang$core$Native_Utils.eq(question.paragraphId, paragraphId);
+			},
+			_moarwick$elm_webpack_starter$Essay$answeredQuestions(model));
+	});
+var _moarwick$elm_webpack_starter$Essay$createMarkdown = function (content) {
+	var sentenceFormat = function (question) {
+		return _moarwick$elm_webpack_starter$Essay$format(question);
+	};
+	var indent = '&ensp;&ensp;&ensp;&ensp;&ensp;';
+	var paragraphBreak = ' \n\n  ';
+	var title = (_moarwick$elm_webpack_starter$Essay$firstAnswerCompleted(content) && _moarwick$elm_webpack_starter$Essay$firstAnswerIsTitle(content)) ? A2(
+		_elm_lang$core$Basics_ops['++'],
+		'# ',
+		A2(
+			_elm_lang$core$Basics_ops['++'],
+			_moarwick$elm_webpack_starter$Format$formatTitle(
+				_moarwick$elm_webpack_starter$Essay$firstAnswer(content)),
+			paragraphBreak)) : A2(
+		_elm_lang$core$Basics_ops['++'],
+		'# ',
+		A2(_elm_lang$core$Basics_ops['++'], content.title, paragraphBreak));
+	var paragraphFormat = function (paragraphId) {
+		var completeParagraph = A2(
+			_elm_lang$core$List$map,
+			sentenceFormat,
+			A2(_moarwick$elm_webpack_starter$Essay$sentencesBelongingToParagraph, content, paragraphId));
+		var firstSentence = A2(
+			_elm_lang$core$String$append,
+			indent,
+			A2(
+				_elm_lang$core$Maybe$withDefault,
+				'',
+				_elm_lang$core$List$head(completeParagraph)));
+		var restOfParagraph = _elm_lang$core$String$concat(
+			A2(
+				_elm_lang$core$Maybe$withDefault,
+				_elm_lang$core$Native_List.fromArray(
+					['']),
+				_elm_lang$core$List$tail(completeParagraph)));
+		return (!_elm_lang$core$Native_Utils.eq(
+			_elm_lang$core$List$length(completeParagraph),
+			0)) ? A2(
+			_elm_lang$core$Basics_ops['++'],
+			firstSentence,
+			A2(_elm_lang$core$Basics_ops['++'], restOfParagraph, paragraphBreak)) : '';
+	};
+	var essayContent = _elm_lang$core$String$concat(
+		A2(
+			_elm_lang$core$List$map,
+			paragraphFormat,
+			_elm_lang$core$Native_List.range(0, content.numberOfParagraphs)));
+	return A2(_elm_lang$core$Basics_ops['++'], title, essayContent);
+};
+var _moarwick$elm_webpack_starter$Essay$paragraphView = F2(
+	function (model, paragraphId) {
+		var paragraphStyle = _elm_lang$html$Html_Attributes$style(
+			_elm_lang$core$Native_List.fromArray(
+				[
+					A2(_moarwick$elm_webpack_starter$Essay_ops['=>'], 'text-indent', '3em'),
+					A2(_moarwick$elm_webpack_starter$Essay_ops['=>'], 'line-height', '2em'),
+					A2(_moarwick$elm_webpack_starter$Essay_ops['=>'], 'font-size', '1em'),
+					A2(_moarwick$elm_webpack_starter$Essay_ops['=>'], 'font-family', _moarwick$elm_webpack_starter$Defaults$essayFont)
+				]));
+		var paragraph = A2(
+			_elm_lang$core$List$map,
+			_moarwick$elm_webpack_starter$Essay$sentenceView,
+			A2(_moarwick$elm_webpack_starter$Essay$sentencesBelongingToParagraph, model.questions, paragraphId));
+		return A2(
+			_elm_lang$html$Html$p,
+			_elm_lang$core$Native_List.fromArray(
+				[paragraphStyle]),
+			paragraph);
+	});
+var _moarwick$elm_webpack_starter$Essay$init = F2(
+	function (questions$, markdown$) {
+		return {markdown: markdown$, questions: questions$, ieVersionNumber: 0, mdl: _debois$elm_mdl$Material$model};
+	});
+var _moarwick$elm_webpack_starter$Essay$download = _elm_lang$core$Native_Platform.outgoingPort(
+	'download',
+	function (v) {
+		return [v._0, v._1];
+	});
+var _moarwick$elm_webpack_starter$Essay$pdf = _elm_lang$core$Native_Platform.outgoingPort(
+	'pdf',
+	function (v) {
+		return [v._0, v._1];
+	});
+var _moarwick$elm_webpack_starter$Essay$update = F2(
+	function (message, model) {
+		var _p1 = message;
+		switch (_p1.ctor) {
+			case 'MDL':
+				return A2(_debois$elm_mdl$Material$update, _p1._0, model);
+			case 'Pdf':
+				var fileName = A2(_elm_lang$core$Basics_ops['++'], _moarwick$elm_webpack_starter$Defaults$projectTitle, '.pdf');
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					model,
+					_elm_lang$core$Native_List.fromArray(
+						[
+							_moarwick$elm_webpack_starter$Essay$pdf(
+							{ctor: '_Tuple2', _0: _moarwick$elm_webpack_starter$Defaults$projectTitle, _1: model.markdown})
+						]));
+			case 'Download':
+				var fileName = A2(_elm_lang$core$Basics_ops['++'], _moarwick$elm_webpack_starter$Defaults$projectTitle, '.doc');
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					model,
+					_elm_lang$core$Native_List.fromArray(
+						[
+							_moarwick$elm_webpack_starter$Essay$download(
+							{ctor: '_Tuple2', _0: fileName, _1: model.markdown})
+						]));
+			case 'UpdateMarkdown':
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{
+							markdown: _moarwick$elm_webpack_starter$Essay$createMarkdown(_p1._0)
+						}),
+					_elm_lang$core$Native_List.fromArray(
+						[]));
+			case 'UpdateEssay':
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{questions: _p1._0}),
+					_elm_lang$core$Native_List.fromArray(
+						[]));
+			default:
+				return A2(
+					_elm_lang$core$Platform_Cmd_ops['!'],
+					model,
+					_elm_lang$core$Native_List.fromArray(
+						[]));
+		}
+	});
+var _moarwick$elm_webpack_starter$Essay$Model = F4(
+	function (a, b, c, d) {
+		return {markdown: a, questions: b, ieVersionNumber: c, mdl: d};
+	});
+var _moarwick$elm_webpack_starter$Essay$NoOp = {ctor: 'NoOp'};
+var _moarwick$elm_webpack_starter$Essay$UpdateEssay = function (a) {
+	return {ctor: 'UpdateEssay', _0: a};
+};
+var _moarwick$elm_webpack_starter$Essay$UpdateMarkdown = function (a) {
+	return {ctor: 'UpdateMarkdown', _0: a};
+};
+var _moarwick$elm_webpack_starter$Essay$Pdf = {ctor: 'Pdf'};
+var _moarwick$elm_webpack_starter$Essay$Download = {ctor: 'Download'};
+var _moarwick$elm_webpack_starter$Essay$MDL = function (a) {
+	return {ctor: 'MDL', _0: a};
+};
+var _moarwick$elm_webpack_starter$Essay$mdlView = function (model) {
+	var buttonContainerStyle = (_elm_lang$core$Native_Utils.eq(model.ieVersionNumber, 0) || (_elm_lang$core$Native_Utils.cmp(model.ieVersionNumber, 11) > 0)) ? _elm_lang$html$Html_Attributes$style(
+		_elm_lang$core$Native_List.fromArray(
+			[
+				A2(_moarwick$elm_webpack_starter$Essay_ops['=>'], 'width', '100%'),
+				A2(_moarwick$elm_webpack_starter$Essay_ops['=>'], 'height', '50px'),
+				A2(_moarwick$elm_webpack_starter$Essay_ops['=>'], 'clear', 'both')
+			])) : _elm_lang$html$Html_Attributes$style(
+		_elm_lang$core$Native_List.fromArray(
+			[
+				A2(_moarwick$elm_webpack_starter$Essay_ops['=>'], 'display', 'none')
+			]));
+	return A2(
+		_elm_lang$html$Html$div,
+		_elm_lang$core$Native_List.fromArray(
+			[buttonContainerStyle]),
+		_elm_lang$core$Native_List.fromArray(
+			[
+				A5(
+				_debois$elm_mdl$Material_Button$render,
+				_moarwick$elm_webpack_starter$Essay$MDL,
+				_elm_lang$core$Native_List.fromArray(
+					[0]),
+				model.mdl,
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_debois$elm_mdl$Material_Button$onClick(_moarwick$elm_webpack_starter$Essay$Download),
+						_debois$elm_mdl$Material_Button$ripple,
+						A2(
+						_debois$elm_mdl$Material_Tooltip$attach,
+						_moarwick$elm_webpack_starter$Essay$MDL,
+						_elm_lang$core$Native_List.fromArray(
+							[3])),
+						A2(_debois$elm_mdl$Material_Options$css, 'float', 'right')
+					]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html$text('word')
+					])),
+				A5(
+				_debois$elm_mdl$Material_Tooltip$render,
+				_moarwick$elm_webpack_starter$Essay$MDL,
+				_elm_lang$core$Native_List.fromArray(
+					[3]),
+				model.mdl,
+				_elm_lang$core$Native_List.fromArray(
+					[_debois$elm_mdl$Material_Tooltip$bottom, _debois$elm_mdl$Material_Tooltip$large]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html$text('Edit or save in Microsoft Word')
+					])),
+				A5(
+				_debois$elm_mdl$Material_Button$render,
+				_moarwick$elm_webpack_starter$Essay$MDL,
+				_elm_lang$core$Native_List.fromArray(
+					[1]),
+				model.mdl,
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_debois$elm_mdl$Material_Button$onClick(_moarwick$elm_webpack_starter$Essay$Pdf),
+						_debois$elm_mdl$Material_Button$ripple,
+						A2(
+						_debois$elm_mdl$Material_Tooltip$attach,
+						_moarwick$elm_webpack_starter$Essay$MDL,
+						_elm_lang$core$Native_List.fromArray(
+							[4])),
+						A2(_debois$elm_mdl$Material_Options$css, 'float', 'right')
+					]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html$text('pdf')
+					])),
+				A5(
+				_debois$elm_mdl$Material_Tooltip$render,
+				_moarwick$elm_webpack_starter$Essay$MDL,
+				_elm_lang$core$Native_List.fromArray(
+					[4]),
+				model.mdl,
+				_elm_lang$core$Native_List.fromArray(
+					[_debois$elm_mdl$Material_Tooltip$bottom, _debois$elm_mdl$Material_Tooltip$large]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html$text('Open as PDF to print or save')
+					]))
+			]));
+};
+var _moarwick$elm_webpack_starter$Essay$view = function (model) {
+	var instructionStyle = _elm_lang$html$Html_Attributes$style(
+		_elm_lang$core$Native_List.fromArray(
+			[
+				A2(_moarwick$elm_webpack_starter$Essay_ops['=>'], 'text-align', 'center'),
+				A2(_moarwick$elm_webpack_starter$Essay_ops['=>'], 'font-size', '1.2em'),
+				A2(_moarwick$elm_webpack_starter$Essay_ops['=>'], 'opacity', '0.6')
+			]));
+	var essayContent = (!_elm_lang$core$Native_Utils.eq(
+		_elm_lang$core$List$length(
+			_moarwick$elm_webpack_starter$Essay$answeredQuestions(model.questions)),
+		0)) ? A2(
+		_elm_lang$html$Html$div,
+		_elm_lang$core$Native_List.fromArray(
+			[]),
+		A2(
+			_elm_lang$core$List$map,
+			_moarwick$elm_webpack_starter$Essay$paragraphView(model),
+			_elm_lang$core$Native_List.range(0, model.questions.numberOfParagraphs))) : A2(
+		_elm_lang$html$Html$div,
+		_elm_lang$core$Native_List.fromArray(
+			[instructionStyle]),
+		_elm_lang$core$Native_List.fromArray(
+			[
+				_elm_lang$html$Html$text(
+				A2(
+					_elm_lang$core$Basics_ops['++'],
+					'(',
+					A2(_elm_lang$core$Basics_ops['++'], model.questions.instructions, ')')))
+			]));
+	return A2(
+		_elm_lang$html$Html$div,
+		_elm_lang$core$Native_List.fromArray(
+			[
+				_elm_lang$html$Html_Attributes$id('essay')
+			]),
+		_elm_lang$core$Native_List.fromArray(
+			[
+				_moarwick$elm_webpack_starter$Essay$mdlView(model),
+				_moarwick$elm_webpack_starter$Essay$titleView(model),
+				essayContent
+			]));
+};

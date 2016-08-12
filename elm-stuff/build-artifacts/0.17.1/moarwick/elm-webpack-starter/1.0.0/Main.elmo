@@ -1,0 +1,4 @@
+var _moarwick$elm_webpack_starter$Main$main = {
+	main: _elm_lang$html$Html_App$program(
+		{init: _moarwick$elm_webpack_starter$WritingAdvice$init, view: _moarwick$elm_webpack_starter$WritingAdvice$view, update: _moarwick$elm_webpack_starter$WritingAdvice$update, subscriptions: _moarwick$elm_webpack_starter$WritingAdvice$subscriptions})
+};

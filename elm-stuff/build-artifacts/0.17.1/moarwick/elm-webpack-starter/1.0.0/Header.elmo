@@ -1,0 +1,35 @@
+var _moarwick$elm_webpack_starter$Header$view = function (model) {
+	return A2(
+		_elm_lang$html$Html$div,
+		_elm_lang$core$Native_List.fromArray(
+			[]),
+		_elm_lang$core$Native_List.fromArray(
+			[
+				A2(
+				_elm_lang$html$Html$img,
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html_Attributes$src(model.logo)
+					]),
+				_elm_lang$core$Native_List.fromArray(
+					[]))
+			]));
+};
+var _moarwick$elm_webpack_starter$Header$update = F2(
+	function (message, model) {
+		var _p0 = message;
+		return A2(
+			_elm_lang$core$Platform_Cmd_ops['!'],
+			model,
+			_elm_lang$core$Native_List.fromArray(
+				[]));
+	});
+var _moarwick$elm_webpack_starter$Header$init = {
+	logo: A2(_elm_lang$core$Basics_ops['++'], _moarwick$elm_webpack_starter$Defaults$imagesLocation, 'logoTVO_WritersDesk.png'),
+	markdown: ''
+};
+var _moarwick$elm_webpack_starter$Header$Model = F2(
+	function (a, b) {
+		return {logo: a, markdown: b};
+	});
+var _moarwick$elm_webpack_starter$Header$NoOp = {ctor: 'NoOp'};

@@ -1,0 +1,111 @@
+var _moarwick$elm_webpack_starter$Format$coordinatingConjunctions = _elm_lang$core$Native_List.fromArray(
+	['and', 'but', 'for', 'nor', 'or', 'yet']);
+var _moarwick$elm_webpack_starter$Format$isCoordinatingConjunction = function (word) {
+	return A2(
+		_elm_lang$core$List$member,
+		_elm_lang$core$String$toLower(word),
+		_moarwick$elm_webpack_starter$Format$coordinatingConjunctions);
+};
+var _moarwick$elm_webpack_starter$Format$prepositions = _elm_lang$core$Native_List.fromArray(
+	['at', 'by', 'in', 'on', 'onto', 'of', 'to', 'with', 'from', 'or', 'is']);
+var _moarwick$elm_webpack_starter$Format$isPreposition = function (word) {
+	return A2(
+		_elm_lang$core$List$member,
+		_elm_lang$core$String$toLower(word),
+		_moarwick$elm_webpack_starter$Format$prepositions);
+};
+var _moarwick$elm_webpack_starter$Format$articles = _elm_lang$core$Native_List.fromArray(
+	['the', 'a', 'an']);
+var _moarwick$elm_webpack_starter$Format$isArticle = function (word) {
+	return A2(
+		_elm_lang$core$List$member,
+		_elm_lang$core$String$toLower(word),
+		_moarwick$elm_webpack_starter$Format$articles);
+};
+var _moarwick$elm_webpack_starter$Format$formatAuthorOfQuotation = F2(
+	function (formatStyle, answer) {
+		var _p0 = formatStyle;
+		if (_p0.ctor === 'AuthorOfQuotation') {
+			return A2(
+				_elm_lang$core$Basics_ops['++'],
+				'— ',
+				A2(
+					_elm_lang$core$Basics_ops['++'],
+					'*',
+					A2(_elm_lang$core$Basics_ops['++'], answer, '*')));
+		} else {
+			return answer;
+		}
+	});
+var _moarwick$elm_webpack_starter$Format$addPossibleQuotes = F2(
+	function (formatStyle, answer) {
+		var _p1 = formatStyle;
+		if (_p1.ctor === 'Quotation') {
+			return A2(
+				_elm_lang$core$Basics_ops['++'],
+				'*',
+				A2(
+					_elm_lang$core$Basics_ops['++'],
+					'“',
+					A2(
+						_elm_lang$core$Basics_ops['++'],
+						answer,
+						A2(_elm_lang$core$Basics_ops['++'], '”', '*'))));
+		} else {
+			return answer;
+		}
+	});
+var _moarwick$elm_webpack_starter$Format$capitalizeFirstCharacter = function (answer) {
+	var remainingString = A2(_elm_lang$core$String$dropLeft, 1, answer);
+	var firstCharacter = A2(_elm_lang$core$String$left, 1, answer);
+	var capitalLetter = _elm_lang$core$String$toUpper(firstCharacter);
+	var capitalizedSentence = _elm_lang$core$String$concat(
+		_elm_lang$core$Native_List.fromArray(
+			[capitalLetter, remainingString]));
+	return capitalizedSentence;
+};
+var _moarwick$elm_webpack_starter$Format$removeSpaceBeforePeriod = function (answer) {
+	return function (_p2) {
+		return A2(
+			_elm_lang$core$String$join,
+			'.',
+			A2(
+				_elm_lang$core$List$map,
+				_elm_lang$core$String$trimRight,
+				A2(_elm_lang$core$String$split, '.', _p2)));
+	}(answer);
+};
+var _moarwick$elm_webpack_starter$Format$trimExtraWhitespace = function (answer) {
+	return function (_p3) {
+		return A2(
+			_elm_lang$core$String$join,
+			' ',
+			_elm_lang$core$String$words(_p3));
+	}(answer);
+};
+var _moarwick$elm_webpack_starter$Format$addSpaceBetweenSentences = function (answer) {
+	return A2(_elm_lang$core$Basics_ops['++'], answer, ' ');
+};
+var _moarwick$elm_webpack_starter$Format$addFinalPeriod = function (answer) {
+	return A2(_elm_lang$core$String$endsWith, '.', answer) ? answer : A2(_elm_lang$core$Basics_ops['++'], answer, '.');
+};
+var _moarwick$elm_webpack_starter$Format$paragraphBreak = ' \n\n  ';
+var _moarwick$elm_webpack_starter$Format$formatTitle = function (answer) {
+	var capitalizedAnswer = _elm_community$string_extra$String_Extra$toTitleCase(answer);
+	var listOfCapitalizedWords = _elm_lang$core$String$words(capitalizedAnswer);
+	var intelligentlyCapitalize = F2(
+		function (id, word) {
+			var isntTheFirstOrLastWord = ((_elm_lang$core$Native_Utils.cmp(id, 0) > 0) && (_elm_lang$core$Native_Utils.cmp(
+				id,
+				_elm_lang$core$List$length(listOfCapitalizedWords) - 1) < 0)) ? true : false;
+			var shouldBeCapitalized = _moarwick$elm_webpack_starter$Format$isArticle(word) || (_moarwick$elm_webpack_starter$Format$isPreposition(word) || _moarwick$elm_webpack_starter$Format$isCoordinatingConjunction(word));
+			return (shouldBeCapitalized && isntTheFirstOrLastWord) ? _elm_community$string_extra$String_Extra$decapitalize(word) : word;
+		});
+	var listOfIntelligentlyCapitalizedWords = A2(_elm_lang$core$List$indexedMap, intelligentlyCapitalize, listOfCapitalizedWords);
+	var intelligentlyCapitalizedString = A2(_elm_lang$core$String$join, ' ', listOfIntelligentlyCapitalizedWords);
+	return A2(_elm_lang$core$Basics_ops['++'], intelligentlyCapitalizedString, _moarwick$elm_webpack_starter$Format$paragraphBreak);
+};
+var _moarwick$elm_webpack_starter$Format$Title = {ctor: 'Title'};
+var _moarwick$elm_webpack_starter$Format$AuthorOfQuotation = {ctor: 'AuthorOfQuotation'};
+var _moarwick$elm_webpack_starter$Format$Quotation = {ctor: 'Quotation'};
+var _moarwick$elm_webpack_starter$Format$Normal = {ctor: 'Normal'};
