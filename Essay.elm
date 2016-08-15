@@ -113,6 +113,7 @@ firstQuestion content =
     , editing = False
     , id = 0
     , paragraphId = 0
+    , groupId = 0
     , rows = 0
     , maxlength = 0
     , format = Format.Normal
@@ -249,6 +250,7 @@ view model =
     ]
   -}
 
+mdlView : Model -> Html Msg
 mdlView model =
     let
     buttonContainerStyle =

@@ -11,9 +11,6 @@ import Defaults
 import String
 
 import Material
-import Material.Scheme
-import Material.Textfield as Textfield
-import Material.Toggles as Toggles
 import Material.Options exposing (css)
 import Material.Button as Button
 
@@ -45,6 +42,7 @@ init =
       , editing = False
       , id = id'
       , paragraphId = question.paragraphId
+      , groupId = question.groupId
       , rows = question.rows
       , maxlength = question.maxlength
       , format = question.format
@@ -66,6 +64,7 @@ init =
         , editing = False
         , id = 0
         , paragraphId = 0
+        , groupId = 0
         , rows = 0
         , maxlength = 0
         , format = Format.Normal
@@ -101,6 +100,7 @@ type alias Question =
   , editing : Bool
   , id : Int
   , paragraphId : Int
+  , groupId : Int
   , rows : Int
   , maxlength : Int
   , format : Format.FormatStyle

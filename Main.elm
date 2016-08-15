@@ -1,11 +1,11 @@
-import Html exposing (..)
 import Html.App as Html
-import WritingAdvice exposing (init, view, update, subscriptions)
+import EssayBuilder exposing (init, view, update, subscriptions)
 --import Questions exposing (init, view, update)
 
 
 -- APP
 
+main : Program Never
 main =
   Html.program
     { init = init

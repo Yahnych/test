@@ -1,19 +1,16 @@
-port module WritingAdvice exposing (init, update, view, subscriptions) --where
+port module EssayBuilder exposing (init, update, view, subscriptions) --where
 
 import Html exposing (..)
 import Html.App as App
 import Html.Attributes exposing (..)
 import Questions exposing (..)
 import Essay exposing (..)
-import Markdown
 import Header exposing (..)
 import Defaults
 import Json.Encode
 import Json.Decode exposing ((:=))
 import Json.Decode.Pipeline
 import Format
-import Data
-import Material
 
 
 -- MODEL
@@ -186,6 +183,7 @@ encodeQuestions model =
     , ("editing", Json.Encode.bool model.editing)
     , ("id", Json.Encode.int model.id)
     , ("paragraphId", Json.Encode.int model.paragraphId)
+    , ("groupId", Json.Encode.int model.groupId)
     , ("rows", Json.Encode.int model.rows)
     , ("maxlength", Json.Encode.int model.maxlength)
     , ("format", encodeFormatStyle model.format)
@@ -234,6 +232,7 @@ questionsDecoder =
     |> Json.Decode.Pipeline.required "editing" Json.Decode.bool
     |> Json.Decode.Pipeline.required "id" Json.Decode.int
     |> Json.Decode.Pipeline.required "paragraphId" Json.Decode.int
+    |> Json.Decode.Pipeline.required "groupId" Json.Decode.int
     |> Json.Decode.Pipeline.required "rows" Json.Decode.int
     |> Json.Decode.Pipeline.required "maxlength" Json.Decode.int
     |> Json.Decode.Pipeline.required "format" formatStyleDecoder
