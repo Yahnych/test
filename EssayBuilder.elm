@@ -11,6 +11,10 @@ import Json.Encode
 import Json.Decode exposing ((:=))
 import Json.Decode.Pipeline
 import Format
+import Data
+
+import Material
+-- import Material.Grid exposing (grid, cell, size, Device(..))
 
 
 -- MODEL
@@ -20,6 +24,7 @@ type alias Model =
   , essay : Essay.Model
   , header : Header.Model
   , ieVersionNumber : Int
+  , mdl : Material.Model
   }
 
 
@@ -34,6 +39,7 @@ init =
       , essay = Essay.init questions'.content ""
       , header = Header.init
       , ieVersionNumber = 0
+      , mdl = Material.model
       }
   in
     model' ! [ checkIeVersion model'.ieVersionNumber ]
@@ -49,6 +55,7 @@ type Msg
   -- | LoadSavedData String
   | SetQuestions Questions.Content
   | CheckIE Int
+  | MDL (Material.Msg Msg)
   | NoOp
 
 
@@ -64,6 +71,10 @@ port checkIeVersion : Int -> Cmd msg
 update : Msg -> Model -> (Model, Cmd Msg)
 update message model =
   case message of
+
+    MDL msg' ->
+      Material.update msg' model
+
     CheckIE versionNumber ->
       let
         essay = model.essay
@@ -168,8 +179,10 @@ encodeQuestion model =
     [ ("title", Json.Encode.string model.title)
     , ("instructions", Json.Encode.string model.instructions)
     , ("questions", Json.Encode.list (List.map encodeQuestions model.questions))
+    , ("questionGroups", Json.Encode.list (List.map encodeQuestionGroups model.questionGroups))
     , ("numberOfParagraphs", Json.Encode.int model.numberOfParagraphs)
     , ("percentageComplete", Json.Encode.int model.percentageComplete)
+    , ("selectedGroupPercentageComplete", Json.Encode.int model.selectedGroupPercentageComplete)
     , ("completionMessage", Json.Encode.string model.completionMessage)
     ]
 
@@ -187,6 +200,15 @@ encodeQuestions model =
     , ("rows", Json.Encode.int model.rows)
     , ("maxlength", Json.Encode.int model.maxlength)
     , ("format", encodeFormatStyle model.format)
+    ]
+
+encodeQuestionGroups : Data.QuestionGroup -> Json.Encode.Value
+encodeQuestionGroups model = 
+  Json.Encode.object
+    [ ("title", Json.Encode.string model.title)
+    , ("description", Json.Encode.string model.description)
+    , ("navigationHeading", Json.Encode.string model.navigationHeading)
+    , ("groupId", Json.Encode.int model.groupId)
     ]
 
 encodeFormatStyle : Format.FormatStyle -> Json.Encode.Value
@@ -214,13 +236,24 @@ decodeQuestionsModel questionsModelJson =
 questionsModelDecoder : Json.Decode.Decoder Questions.Content
 --questionsModelDecoder : Json.Decode.Decoder (Material.Model -> Questions.Model)
 questionsModelDecoder =
-  Json.Decode.object6 Questions.Content
+  Json.Decode.object8 Questions.Content
     ("title" := Json.Decode.string)
     ("instructions" := Json.Decode.string)
     ("questions" := Json.Decode.list questionsDecoder)
+    ("questionGroups" := Json.Decode.list questionGroupsDecoder)
     ("numberOfParagraphs" := Json.Decode.int)
     ("percentageComplete" := Json.Decode.int)
+    ("selectedGroupPercentageComplete" := Json.Decode.int)
     ("completionMessage" := Json.Decode.string)
+
+
+questionGroupsDecoder : Json.Decode.Decoder Data.QuestionGroup
+questionGroupsDecoder =
+  Json.Decode.Pipeline.decode Data.QuestionGroup
+    |> Json.Decode.Pipeline.required "title" Json.Decode.string
+    |> Json.Decode.Pipeline.required "description" Json.Decode.string
+    |> Json.Decode.Pipeline.required "navigationHeading" Json.Decode.string 
+    |> Json.Decode.Pipeline.required "groupId" Json.Decode.int
 
 
 questionsDecoder : Json.Decode.Decoder Questions.Question
@@ -309,14 +342,16 @@ view model =
       , "width" => "100vw"
       , "height" => "100vh"
       ]
+
     questionContainerStyle =
       style
       [ "padding" => "2vh 5vw 5vh 5vw"
-      , "overflow" => "hidden"
+      --"overflow" => "hidden"
       , "overflow-y" => "auto"
-      , "overflow-x" => "auto"
+      --, "overflow-x" => "auto"
       , "position" => "relative"
       ]
+
     essayContainerStyle =
       style
       [ "padding" => "5vh 5vw 5vh 5vw"
@@ -331,9 +366,12 @@ view model =
       ]
     titleStyle =
       style
-      [ "font-size" => "3.5em"
+      [ "font-size" => "2.5em"
       , "font-family" => Defaults.titleFont
-      , "padding-top" => "0.5em"
+      --, "padding-top" => "0.2em"
+      , "padding-top" => "0.3em"
+      , "padding-bottom" => "0em"
+      --, "position" => "fixed"
       ]
 
     spacerStyle =
@@ -343,8 +381,26 @@ view model =
 
 
   in 
+    div [ Html.Attributes.class "mdl-grid", mainContainerStyle, id "test" ]
+     [ div 
+         [ Html.Attributes.id "questionsContainer", Html.Attributes.class "mdl-cell mdl-cell--6-col", questionContainerStyle ]
+         [ App.map UpdateHeader (Header.view model.header)
+         , h1 [ titleStyle ] [ text model.questions.content.title ]
+         , App.map UpdateQuestions (Questions.view model.questions)
+
+         -- This spacer div is an unfortunate cross-platform hack to add default
+         -- padding at the bottom of the questions box 
+         , div [ spacerStyle ] []
+         ]
+      , div 
+         [ Html.Attributes.class "mdl-cell mdl-cell--6-col", essayContainerStyle ] 
+         [ App.map UpdateHtmlEssay (Essay.view model.essay) 
+         --, Markdown.toHtml [] model.essay.markdown
+         ]
+     ]
+  {-
   div [ Html.Attributes.class "mdl-grid", mainContainerStyle ]
-    [ div 
+   [ div 
        [ Html.Attributes.class "mdl-cell mdl-cell--6-col", questionContainerStyle ]
        [ App.map UpdateHeader (Header.view model.header)
        , h1 [ titleStyle ] [ text model.questions.content.title ]
@@ -359,5 +415,58 @@ view model =
        [ App.map UpdateHtmlEssay (Essay.view model.essay) 
        --, Markdown.toHtml [] model.essay.markdown
        ]
-    ]
+   ]
+  -}
+  {-
+  div [ Html.Attributes.class "mdl-grid", mainContainerStyle ]
+    [ div 
+       [ Html.Attributes.class "mdl-cell mdl-cell--6-col", questionContainerStyle ]
+       [ -- App.map UpdateHeader (Header.view model.header)
+       -- h1 [ titleStyle ] [ text model.questions.content.title ]
+       --, App.map UpdateQuestions (Questions.view model.questions)
+       App.map UpdateQuestions (Questions.tabView model.questions)
 
+       -- This spacer div is an unfortunate cross-platform hack to add default
+       -- padding at the bottom of the questions box 
+       , div [ spacerStyle ] []
+       ]
+    , div 
+       [ Html.Attributes.class "mdl-cell mdl-cell--6-col", essayContainerStyle ] 
+       [ App.map UpdateHtmlEssay (Essay.view model.essay) 
+       --, Markdown.toHtml [] model.essay.markdown
+       ]
+    ]
+  -}
+  {-
+     div 
+       []
+       [ -- App.map UpdateHeader (Header.view model.header)
+       -- h1 [ titleStyle ] [ text model.questions.content.title ]
+       --, App.map UpdateQuestions (Questions.view model.questions)
+       App.map UpdateQuestions (Questions.tabView model.questions)
+
+       -- This spacer div is an unfortunate cross-platform hack to add default
+       -- padding at the bottom of the questions box 
+       --, div [ spacerStyle ] []
+       ]
+  -}
+  {-
+    grid []
+    [ cell [ Material.Grid.size All 6 ]
+      [ div [ questionContainerStyle ]
+        [ App.map UpdateHeader (Header.view model.header)
+        , h1 [ titleStyle ] [ text model.questions.content.title ]
+        , App.map UpdateQuestions (Questions.view model.questions)
+
+        -- This spacer div is an unfortunate cross-platform hack to add default
+        -- padding at the bottom of the questions box 
+         , div [ spacerStyle ] []
+        ] 
+      ]
+    , cell [ Material.Grid.size All 6 ]
+      [ div [ essayContainerStyle ]
+        [ App.map UpdateHtmlEssay (Essay.view model.essay)
+        ]
+      ]
+    ]
+  -}

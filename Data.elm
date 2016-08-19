@@ -71,33 +71,33 @@ type alias QuestionGroup =
 questionGroups : List QuestionGroup
 questionGroups =
   [
-    { title = "Introduction"
+    { title = "Paragraph 1: Introduction"
     , description = ""
-    , navigationHeading = "Pargraph 1"
+    , navigationHeading = "One"
     , groupId = 0
     }
   ,
-    { title = "How the Inuit showed resilience in the Nunavut land claim"
+    { title = "Paragraph 2: How the Inuit showed resilience in the Nunavut land claim"
     , description = ""
-    , navigationHeading = "Pargraph 2"
+    , navigationHeading = "Two"
     , groupId = 1
     }
   ,
-    { title = "How the Tsilhqot’in showed resilience in their land claim in British Columbia"
+    { title = "Paragraph 3: How the Tsilhqot’in showed resilience in their land claim in British Columbia"
     , description = ""
-    , navigationHeading = "Pargraph 3"
+    , navigationHeading = "Three"
     , groupId = 2
     }
   ,
-    { title = "How the Métis showed resilience in their land claim in Manitoba"
+    { title = "Paragraph 4: How the Métis showed resilience in their land claim in Manitoba"
     , description = ""
-    , navigationHeading = "Pargraph 4"
+    , navigationHeading = "Four"
     , groupId = 3
     }
   ,
-    { title = "Conclusion"
+    { title = "Paragraph 5: Conclusion"
     , description = ""
-    , navigationHeading = "Pargraph 5"
+    , navigationHeading = "Five"
     , groupId = 4
     }
   ]
@@ -173,7 +173,7 @@ What is your argument (what statement are you going to prove in this paragraph)?
     , groupId = 1
     , rows = 3
     , maxlength = 0
-    , format = Format.Title
+    , format = Format.Normal
     }
   ,
     { question = 
@@ -228,7 +228,7 @@ What proof do you have to support this second point?
     , groupId = 1
     , rows = 3
     , maxlength = 0
-    , format = Format.Title
+    , format = Format.Normal
     }
   ,
     { question = 
@@ -297,7 +297,7 @@ What is your argument (what statement are you going to prove in this paragraph)?
     , groupId = 2
     , rows = 3
     , maxlength = 0
-    , format = Format.Title
+    , format = Format.Normal
     }
   ,
     { question = 
@@ -352,7 +352,7 @@ What proof do you have to support this second point?
     , groupId = 2
     , rows = 3
     , maxlength = 0
-    , format = Format.Title
+    , format = Format.Normal
     }
   ,
     { question = 
@@ -421,7 +421,7 @@ What is your argument (what statement are you going to prove in this paragraph)?
     , groupId = 3
     , rows = 3
     , maxlength = 0
-    , format = Format.Title
+    , format = Format.Normal
     }
   ,
     { question = 
@@ -476,7 +476,7 @@ What proof do you have to support this second point?
     , groupId = 3
     , rows = 3
     , maxlength = 0
-    , format = Format.Title
+    , format = Format.Normal
     }
   ,
     { question = 
@@ -545,7 +545,7 @@ What is the overall argument of your essay?
     , groupId = 4
     , rows = 3
     , maxlength = 0
-    , format = Format.Title
+    , format = Format.Normal
     }
   ,
     { question = 
