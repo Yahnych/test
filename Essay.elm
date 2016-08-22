@@ -3,10 +3,12 @@ port module Essay exposing (..) --where
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import String
+import String.Extra
 import Questions
 import Format
 import Markdown
 import Defaults
+import Data
 
 import Material
 import Material.Scheme
@@ -37,7 +39,7 @@ init questions' markdown' =
 -- UPDATE
 
 type Msg 
-  = MDL Material.Msg
+  = MDL (Material.Msg Msg)
   | Download
   | Pdf
   | UpdateMarkdown Questions.Content
@@ -53,20 +55,20 @@ port pdf : (String, String) -> Cmd msg
 update: Msg -> Model -> (Model, Cmd Msg)
 update message model = 
   case message of 
-    MDL msg ->
-      Material.update MDL msg model
+    MDL msg' ->
+      Material.update msg' model
 
     Pdf ->
       let
         fileName = 
-          Defaults.projectTitle ++ ".pdf"
+          Data.title ++ ".pdf"
       in
-      model ! [ pdf (Defaults.projectTitle, model.markdown) ]
+      model ! [ pdf (fileName, model.markdown) ]
 
     Download ->
       let
         fileName = 
-          Defaults.projectTitle ++ ".doc"
+          Data.title ++ ".doc"
       in
       model ! [ download (fileName, model.markdown) ]
       --model ! []
@@ -165,7 +167,12 @@ createMarkdown model =
       format question
 
   in
+    -- Build the essay markdown string
     title ++ essayContent
+
+    -- Strip any HTML tags that might have been accidentally copied
+    -- into the text fields 
+    |> String.Extra.stripTags
 
 -- VIEW
 
@@ -207,7 +214,11 @@ view model =
 mdlView model =
     let
     buttonContainerStyle =
-      if model.ieVersionNumber == 0 || model.ieVersionNumber > 11 then
+      -- Don't display Word or PDF buttons on IE, because they don't work
+      -- This commented version of the if statement allows them to work for versions of
+      -- IE greater than 11... but in my testing (August 2016) that didn't work either :(
+      -- if model.ieVersionNumber == 0 || model.ieVersionNumber > 11 then
+      if model.ieVersionNumber == 0 then
         style 
           [ "width" => "100%"
           , "height" => "50px"

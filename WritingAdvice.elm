@@ -328,7 +328,7 @@ view model =
       ]
     titleStyle =
       style
-      [ "font-size" => "3.5em"
+      [ "font-size" => "2.5em"
       , "font-family" => Defaults.titleFont
       , "padding-top" => "0.5em"
       ]
