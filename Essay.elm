@@ -8,6 +8,7 @@ import Questions
 import Format
 import Markdown
 import Defaults
+import Data
 
 import Material
 import Material.Button as Button
@@ -59,14 +60,14 @@ update message model =
     Pdf ->
       let
         fileName = 
-          Defaults.projectTitle ++ ".pdf"
+          Data.title ++ ".pdf"
       in
-      model ! [ pdf (Defaults.projectTitle, model.markdown) ]
+      model ! [ pdf (fileName, model.markdown) ]
 
     Download ->
       let
         fileName = 
-          Defaults.projectTitle ++ ".doc"
+          Data.title ++ ".doc"
       in
       model ! [ download (fileName, model.markdown) ]
 
@@ -218,7 +219,7 @@ createMarkdown content =
     -- Strip any HTML tags that might have been accidentally copied
     -- into the text fields 
     |> String.Extra.stripTags
-    
+
 
 -- VIEW
 

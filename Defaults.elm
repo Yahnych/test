@@ -11,4 +11,3 @@ titleFont = "SuisseIntl-Thin"
 
 essayFont = "LibreBaskerville-Regular, serif"
 
-projectTitle = "Author's Advice to Writers"
