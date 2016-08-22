@@ -3,6 +3,7 @@ port module Essay exposing (..) --where
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import String
+import String.Extra
 import Questions
 import Format
 import Markdown
@@ -211,7 +212,13 @@ createMarkdown content =
       format question
 
   in
+    -- Build the essay markdown string
     title ++ essayContent
+
+    -- Strip any HTML tags that might have been accidentally copied
+    -- into the text fields 
+    |> String.Extra.stripTags
+    
 
 -- VIEW
 

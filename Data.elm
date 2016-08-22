@@ -30,35 +30,7 @@ Answer the questions on the left to build your essay.
 completionMessage : String
 completionMessage =
   """
-Now that you have a rough outline of your essay, it needs to be revised.  Use the following checklist to review and revise your essay. 
-(Revise your essay by updating your answers to the questions above.) 
-
-1. Introduction paragraph
-  - Is the topic of your essay clearly stated and explained?
-  - Does the introductory paragraph outline and explain the topics that will be discussed in the essay? 
-  - Does the thesis statement states all of the arguments that will be made in the essay. 
-
-2. Body paragraphs
-  - Does each paragraph have a clear topic sentence that relates to the main idea of the essay?
-  - Does each body paragraph include three sets of point/proof/explanation which directly support the topic sentence of the paragraph?
-  - Does each body paragraph have a concluding sentence that restates the argument made in the paragraph and concludes the paragraph in a memorable and meaningful way?
-
-3. Conclusion paragraph
-  - Is the argument of the essay restated differently than it was in the thesis statement of the introduction?
-  - Are the supporting points succinctly summarized?
-  - Can the argument and points made in the essay be applied to a broader, meaningful, and relevant context?
-  - Does the paragraph leave an impression on the reader through interesting and thought-provoking statements?
-
-4. All paragraphs
-  - Is the first line of each paragraph indented?
-  - Are all sentences complete?
-  - Does each sentence begin with a capital letter?
-  - Does each sentence begin with a punctuation mark?
-  - Is each sentence free of spelling and grammatical errors?
-  - When read aloud, do all sentences make sense?
-  - Are Transition words are used to connect ideas (e.g., firstly, secondly, thirdly, thus, therefore etc.)
-
-Once you can say “yes” to all of the above statements and you have finished revising your essay, save the final draft.
+Your essay is complete. Make any revisions by updating your answers to the questions above. 
   """
 
 type alias QuestionGroup = 

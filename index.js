@@ -84,7 +84,7 @@ if (msieversion() > 0 && msieversion() < 12){
 
 //Local storage
 
-localStorage.clear();
+//localStorage.clear();
 
 //Save the data
 var dataFile = "nbe3u_13.5.1";

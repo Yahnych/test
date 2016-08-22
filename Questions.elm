@@ -551,7 +551,8 @@ view model =
           , Textfield.autofocus 
           , Textfield.maxlength <| getMaxLength question.maxlength
           , Textfield.rows question.rows
-          , Textfield.textarea
+          , Textfield.textarea 
+          , Textfield.value question.answer
           , Textfield.on "input" (Json.map (UpdateField question) targetValue)
 
           -- Assign a unique html `id` attribute that matches the `question.id`. This is used 
