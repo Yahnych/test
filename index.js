@@ -87,18 +87,20 @@ if (msieversion() > 0 && msieversion() < 12){
 //localStorage.clear();
 
 //Save the data
+var dataFile = "cvh2oq_2.2.2";
+
 app.ports.save.subscribe(function(data){
-	localStorage.setItem("data", JSON.stringify(data));
-	//console.log("*** Saving data...")
-	//console.log(JSON.stringify(data))
+  localStorage.setItem(dataFile, JSON.stringify(data));
+  //console.log("*** Saving data...")
+  //console.log(JSON.stringify(data))
 });
 
 //Load the data
-var savedData = localStorage.getItem("data");
+var savedData = localStorage.getItem(dataFile);
 window.setTimeout(function(){
-	app.ports.load.send(JSON.parse(savedData));
-	//console.log("*** Loaded data")
-	//console.log(savedData)
+  app.ports.load.send(JSON.parse(savedData));
+  //console.log("*** Loaded data")
+  //console.log(savedData)
 }, 0);
 
 //Download file

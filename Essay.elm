@@ -252,7 +252,8 @@ view model =
 mdlView model =
     let
     buttonContainerStyle =
-      if model.ieVersionNumber == 0 || model.ieVersionNumber > 11 then
+      -- if model.ieVersionNumber == 0 || model.ieVersionNumber > 11 then
+      if model.ieVersionNumber == 0 then
         style 
           [ "width" => "100%"
           , "height" => "50px"

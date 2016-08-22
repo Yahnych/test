@@ -27,7 +27,7 @@ type alias Model =
 
 init : Model
 init = 
-  { logo = Defaults.imagesLocation ++ "logoTVO_WritersDesk.png"
+  { logo = Defaults.imagesLocation ++ "logo_WritersDeskLong_48.png"
   --, mdl = Material.model
   , markdown = ""
   }
