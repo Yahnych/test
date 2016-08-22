@@ -13,6 +13,7 @@ import String
 import Material
 import Material.Scheme
 import Material.Textfield as Textfield
+import Material.Options as Options exposing (css)
 import Material.Toggles as Toggles
 import Material.Options exposing (css)
 import Material.Button as Button
@@ -399,11 +400,9 @@ view model =
       ++ "%"
 
     questions question =
-      li [ listItemStyle ]
-      [ img [ (src <| checkbox question.completed), checkboxStyle ] []
-      , Markdown.toHtml [ questionStyle ] question.question 
-      , div [ ]
-        [ textarea 
+       let
+        ordinaryTextfield =
+          textarea 
           [ on "input" (Json.map (UpdateField question) targetValue)
           --, onBlur UpdatePercentageComplete
           , class "mdl-textfield__input"
@@ -413,6 +412,32 @@ view model =
           , autofocus <| setAutoFocus question
           ] 
           [ text question.answer ]
+
+        mdlTextfield =
+          Textfield.render MDL [ question.id ] model.mdl
+          [ Textfield.label ""
+          , Textfield.autofocus 
+          , Textfield.maxlength <| getMaxLength question.maxlength
+          , Textfield.rows question.rows
+          , Textfield.textarea 
+          , Textfield.value question.answer
+          , Textfield.on "input" (Json.map (UpdateField question) targetValue)
+
+          -- Assign a unique html `id` attribute that matches the `question.id`. This is used 
+          -- by the `SetFocus` message to set the input focus to the first question
+          -- in the tab list when a tab is clicked or the `next paragraph` button is clicked
+          , Textfield.style [ Options.attribute <| Html.Attributes.id ("question" ++ toString (question.id)) ]
+          , css "width" "90%"
+          --, Textfield.text' question.answer
+          ]
+
+      in
+      li [ listItemStyle ]
+      [ img [ (src <| checkbox question.completed), checkboxStyle ] []
+      , Markdown.toHtml [ questionStyle ] question.question 
+      , div [ ]
+        [ mdlTextfield 
+          --ordinaryTextfield
         ]
       ]
 
@@ -422,12 +447,12 @@ view model =
       ]
 
     doneButton =
-       Button.render MDL [0] model.mdl
+       Button.render MDL [100] model.mdl
         [ Button.ripple
         , Button.raised
         , Button.colored
         , Button.onClick CheckForCompletion
-        , css "background-color" "rgb(0, 127, 163)"
+        --, css "background-color" "rgb(0, 127, 163)"
         , css "float" "right"
         , css "margin-top" "2em"
         ]

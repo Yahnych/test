@@ -3,6 +3,7 @@ port module Essay exposing (..) --where
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import String
+import String.Extra
 import Questions
 import Format
 import Markdown
@@ -223,7 +224,12 @@ createMarkdown content =
       format question
 
   in
+ -- Build the essay markdown string
     title ++ essayContent
+
+    -- Strip any HTML tags that might have been accidentally copied
+    -- into the text fields 
+    |> String.Extra.stripTags
 
 -- VIEW
 
@@ -267,7 +273,11 @@ view model =
 mdlView model =
     let
     buttonContainerStyle =
-      if model.ieVersionNumber == 0 || model.ieVersionNumber > 11 then
+      -- Don't display Word or PDF buttons on IE, because they don't work
+      -- This commented version of the if statement allows them to work for versions of
+      -- IE greater than 11... but in my testing (August 2016) that didn't work either :(
+      -- if model.ieVersionNumber == 0 || model.ieVersionNumber > 11 then
+      if model.ieVersionNumber == 0 then
         style 
           [ "width" => "100%"
           , "height" => "50px"
