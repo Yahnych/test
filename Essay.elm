@@ -252,19 +252,26 @@ view model =
 
 mdlView model =
     let
-    buttonContainerStyle =
-      if model.ieVersionNumber == 0 || model.ieVersionNumber > 11 then
-        style 
-          [ "width" => "100%"
-          , "height" => "50px"
-          --, "display" => "block"
-          , "clear" => "both"
-          --, "background-color" => "aliceBlue"
-          ]
-      else
-        style 
-          [ "display" => "none" 
-          ]
+      buttonContainerStyle =
+          style 
+            [ "width" => "100%"
+            , "height" => "50px"
+            --, "display" => "block"
+            , "clear" => "both"
+            --, "background-color" => "aliceBlue"
+            ]
+       
+      displayPDFbutton = 
+        if model.ieVersionNumber == 0 || model.ieVersionNumber > 11 then
+          "inline-block"
+        else
+          "none"
+
+      displayWordButton =
+        if model.ieVersionNumber == 0 || model.ieVersionNumber > 10 then
+          "inline-block"
+        else
+          "none"
 
     in 
 
@@ -274,6 +281,7 @@ mdlView model =
         , Button.ripple
         , Tooltip.attach MDL [3]
         , css "float" "right"
+        , css "display" displayWordButton
         ]
         [ text "word" ]
     , Tooltip.render MDL [3] model.mdl
@@ -286,6 +294,7 @@ mdlView model =
         , Button.ripple
         , Tooltip.attach MDL [4] 
         , css "float" "right"
+        , css "display" displayPDFbutton
         ]
         [ text "pdf" ]
     , Tooltip.render MDL [4] model.mdl
@@ -294,7 +303,6 @@ mdlView model =
         ]
         [ text "Open as PDF to print or save" ]
     ]
-  --|> Material.Scheme.top
 
 -- The title view
 titleView : Model -> Html Msg
